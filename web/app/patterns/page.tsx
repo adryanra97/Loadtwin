@@ -1,4 +1,5 @@
 "use client";
+import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import { LineChart } from "@/components/charts";
 import { Trash } from "@/components/icons";
@@ -111,10 +112,7 @@ export default function PatternsPage() {
 
   return (
     <div>
-      <div className="page-head">
-        <h1>Load patterns</h1>
-        <p className="lede">Real traffic is not flat. Run the target setup through a day, a spike or a ramp and see when, and for how long, the SLA breaks.</p>
-      </div>
+      <ToolPageIntro category="TRAFFIC BEHAVIOR" title="Load patterns" description="Real traffic is not flat. Run the target setup through a day, a spike or a ramp and see when, and for how long, the SLA breaks." />
       <div className="tool">
         <aside className="stack">
           <ServiceStrip />
