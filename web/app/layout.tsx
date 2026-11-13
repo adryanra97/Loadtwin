@@ -1,6 +1,22 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import { Header } from "@/components/shell";
 import "./globals.css";
+
+const display = localFont({
+  src: "./fonts/bricolage-grotesque.woff2",
+  variable: "--font-display",
+  weight: "200 800",
+  display: "swap",
+  adjustFontFallback: "Arial",
+});
+const ui = localFont({
+  src: "./fonts/instrument-sans.woff2",
+  variable: "--font-ui",
+  weight: "400 700",
+  display: "swap",
+  adjustFontFallback: "Arial",
+});
 
 export const metadata: Metadata = {
   title: { default: "LoadTwin", template: "%s · LoadTwin" },
@@ -11,14 +27,14 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f9f9f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0d0d0d" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f6f8" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f131c" },
   ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${display.variable} ${ui.variable}`}>
       <body>
         <a className="skip" href="#main">
           Skip to content

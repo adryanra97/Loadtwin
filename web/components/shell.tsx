@@ -44,6 +44,7 @@ export function Header() {
         <Link href="/" className="brand" aria-label="LoadTwin home">
           <Logo /> LoadTwin
         </Link>
+        <div className="nav-wrap">
         <nav className="nav" aria-label="Main">
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} aria-current={path === n.href || path + "/" === n.href ? "page" : undefined}>
@@ -51,6 +52,7 @@ export function Header() {
             </Link>
           ))}
         </nav>
+        </div>
         <div className="topbar-tools">
           <span className="small muted row" style={{ gap: 6 }} role="status">
             <span

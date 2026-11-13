@@ -161,7 +161,7 @@ export default function AutosizePage() {
                             <input
                               type="number"
                               step="any"
-                              style={{ width: k === "hourlyUsd" ? 64 : 48 }}
+                              style={{ width: k === "hourlyUsd" ? 72 : 52 }}
                               aria-label={`${row.name || `Machine ${i + 1}`} ${COL[k].label}`}
                               aria-invalid={rowErr(i, k) ? true : undefined}
                               title={rowErr(i, k) || undefined}
@@ -263,10 +263,9 @@ function Results({ res, stale }: { res: AutosizeResult; stale: boolean }) {
           </span>
           <div className="stack-sm">
             <h2 style={{ fontSize: "1.5rem" }}>
-              {rec.nodes} × {rec.machine.name}{" "}
-              <span style={{ fontWeight: 500 }}>
-                · {usd(rec.monthlyUsd)}
-                <span className="small">/month</span>
+              {rec.nodes} × {rec.machine.name}
+              <span style={{ fontWeight: 500, display: "block", fontSize: "1.05rem", marginTop: 2 }}>
+                {usd(rec.monthlyUsd)} per month
               </span>
             </h2>
             <p>
@@ -275,7 +274,7 @@ function Results({ res, stale }: { res: AutosizeResult; stale: boolean }) {
                 : `The cheapest setup that meets the SLA, but ${resourceName(rec.topResource)} reaches ${pct(rec.topUtilizationPct)} at peak, so there is little headroom.`}
             </p>
             <p className="small">
-              p95 {num(rec.peak.p95Ms)} ms · CPU {pct(rec.peak.cpuPct, 1)} · errors {pct(rec.peak.errorRatePct, 2)} · {rec.totalVcpu} vCPU in total
+              At peak: p95 {num(rec.peak.p95Ms)} ms, CPU {pct(rec.peak.cpuPct, 1)}, errors {pct(rec.peak.errorRatePct, 2)}, {rec.totalVcpu} vCPU in total.
             </p>
           </div>
         </section>

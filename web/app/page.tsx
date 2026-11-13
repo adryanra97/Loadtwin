@@ -1,97 +1,95 @@
 import Link from "next/link";
-import { ServiceStrip } from "@/components/shell";
+import { TwinHero } from "@/components/twin-hero";
 
 const TOOLS = [
   {
     href: "/evaluate/",
     title: "Evaluate",
-    q: "Does the target setup meet the SLA at peak, and how likely is it to break?",
-    out: "Verdict, limiting resource, capacity, breach probability",
+    q: "Does the production setup meet the SLA at peak, and how often would it break by chance?",
+    out: "Verdict with reasons, limiting resource, capacity, breaking point, breach probability",
   },
   {
     href: "/autosize/",
     title: "Auto-size",
     q: "What is the cheapest cluster that carries my peak load?",
-    out: "Nodes per machine type, monthly cost, recommendation",
+    out: "Fewest nodes per machine type, monthly cost, a recommendation with headroom",
   },
   {
     href: "/patterns/",
     title: "Load patterns",
-    q: "Does it survive a daily curve, a sudden spike or a ramp?",
-    out: "Time over the SLA, worst moment, recovery time",
+    q: "Does it survive a business day, a sudden spike or a steady ramp?",
+    out: "Time over the SLA, the worst ten seconds, how long it takes to recover",
   },
   {
     href: "/validate/",
     title: "Validate",
     q: "How far can I trust the model? Import k6, JMeter or Locust results.",
-    out: "Predicted vs measured at every load level, a trust grade",
+    out: "Predicted against measured latency at every load level, and a trust grade",
   },
 ];
 
 export default function Home() {
   return (
-    <div className="stack" style={{ gap: 28 }}>
-      <section className="page-head" style={{ marginBottom: 0 }}>
-        <h1>Will your service survive its load?</h1>
-        <p className="lede">
-          LoadTwin builds a digital twin of your service from one load-test measurement, then simulates it request by request
-          with SimPy. Ask it about bigger traffic, other machines, or what the cheapest safe setup is, before you pay for
-          the infrastructure.
-        </p>
-      </section>
-
-      <section className="stack-sm" aria-labelledby="svc-h">
-        <h2 id="svc-h" className="section-title">
-          1. Describe your service
-        </h2>
-        <ServiceStrip />
-        <p className="hint">
-          This starts as an example. Replace it with your own measurement on the <Link href="/service/">Service</Link> page;
-          every tool uses it.
-        </p>
-      </section>
-
-      <section className="stack-sm" aria-labelledby="tools-h">
-        <h2 id="tools-h" className="section-title">
-          2. Ask a question
-        </h2>
-        <div className="grid-cards">
-          {TOOLS.map((t) => (
-            <Link key={t.href} href={t.href} className="card tool-card">
-              <h3>{t.title}</h3>
-              <p className="q">{t.q}</p>
-              <p className="hint">{t.out}</p>
-              <span className="go" aria-hidden>
-                Open {t.title.toLowerCase()} →
-              </span>
+    <div className="landing">
+      <section className="hero" aria-labelledby="hero-h">
+        <div className="hero-copy">
+          <h1 id="hero-h" className="hero-title">
+            Find where your service breaks before your users do.
+          </h1>
+          <p className="hero-lede">
+            LoadTwin builds a digital twin from one load test and simulates every request with SimPy: queues, threads, CPU,
+            connections and the database. Try bigger traffic or other machines without paying for them first.
+          </p>
+          <div className="row hero-cta">
+            <Link className="btn btn-primary btn-lg" href="/evaluate/">
+              Evaluate the example
             </Link>
-          ))}
+            <Link className="btn btn-lg" href="/service/">
+              Enter my measurements
+            </Link>
+          </div>
         </div>
+        <TwinHero />
       </section>
 
-      <section className="card" aria-labelledby="how-h">
-        <h2 id="how-h" style={{ marginBottom: 12 }}>
-          How it works
-        </h2>
-        <ol className="steps">
+      <section aria-labelledby="tools-h" className="tools">
+        <h2 id="tools-h">Four questions it answers</h2>
+        <ul className="tool-list">
+          {TOOLS.map((t) => (
+            <li key={t.href}>
+              <Link href={t.href} className="tool-row">
+                <span className="tool-name">{t.title}</span>
+                <span className="tool-q">{t.q}</span>
+                <span className="tool-out">{t.out}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section aria-labelledby="how-h" className="how">
+        <h2 id="how-h">How a result is made</h2>
+        <ol className="how-steps">
           <li>
-            <div>
-              <strong>Calibrate.</strong> CPU time per request and waiting time are fitted until the simulated p95 matches the
-              one you measured. If the fit is off by more than 15%, LoadTwin says the result is not assessable instead of
-              guessing.
-            </div>
+            <h3>Calibrate</h3>
+            <p>
+              CPU time per request and waiting time are fitted until the simulated p95 matches the one you measured. If the fit is
+              off by more than 15%, you get “not assessable” instead of a guess.
+            </p>
           </li>
           <li>
-            <div>
-              <strong>Scale.</strong> The profile is moved to the target machines. Larger machines do not scale perfectly, so
-              contention is modelled with the Universal Scalability Law.
-            </div>
+            <h3>Scale</h3>
+            <p>
+              The profile moves to the target machines. Bigger machines never scale perfectly, so contention is modelled with the
+              Universal Scalability Law.
+            </p>
           </li>
           <li>
-            <div>
-              <strong>Simulate.</strong> Every request queues for a worker thread, CPU, a database connection and the shared
-              database. The verdict comes from what happens in that queue, not from a formula.
-            </div>
+            <h3>Simulate</h3>
+            <p>
+              Each request waits for a worker thread, a CPU core, a database connection and the shared database. The verdict comes
+              from what happens in those queues, not from a formula.
+            </p>
           </li>
         </ol>
       </section>
