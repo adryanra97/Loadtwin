@@ -426,3 +426,6 @@ body main:not(:has(.lt-home)):not(:has(.lt-service)) .card .muted {
 .ed-tool-live:hover {
   background: #d3ecf4;
 }
+.ed-tool-gives {
+  color: #4f6573;
+}
