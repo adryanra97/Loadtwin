@@ -1,7 +1,7 @@
 {
   "name": "loadtwin-web",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "scripts": {
     "samples": "node scripts/copy-samples.mjs",
     "predev": "npm run samples",

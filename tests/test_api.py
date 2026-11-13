@@ -18,7 +18,8 @@ def test_meta():
     assert h["status"] == "ok" and h["auth"] is False
     assert client.get("/api/docs").status_code == 200
     assert client.get("/api/openapi.json").json()["info"]["title"] == "LoadTwin"
-    assert set(client.get("/api/v1/examples").json()) == {"evaluate", "simulate", "autosize", "pattern", "validate"}
+    names = {"evaluate", "simulate", "autosize", "pattern", "validate", "fault", "sensitivity", "assistant"}
+    assert set(client.get("/api/v1/examples").json()) == names
 
 
 def test_evaluate_and_simulate():
@@ -48,6 +49,17 @@ def test_pattern_endpoint():
     assert r["verdict"] in {"PASS", "PASS_WITH_CONDITIONS", "FAIL"} and r["windows"]
 
 
+def test_fault_sensitivity_assistant_endpoints(monkeypatch):
+    monkeypatch.delenv("LOADTWIN_LLM_API_KEY", raising=False)
+    assert client.get("/api/health").json()["assistant"] == "rules"
+    f = client.post("/api/v1/fault", json=ex("fault")).json()
+    assert f["verdict"] and f["phases"]["during"]["requests"] > 0
+    s = client.post("/api/v1/sensitivity", json=ex("sensitivity") | {"params": ["nodes", "cpuMs"]}).json()
+    assert len(s["params"]) == 2
+    a = client.post("/api/v1/assistant", json=ex("assistant")).json()
+    assert a["peakTps"] == 90 and a["tool"] == "evaluate"
+
+
 def test_parse_and_validate():
     for name, fmt in [("jmeter-results.csv", "jmeter"), ("locust_stats_history.csv", "locust"), ("k6-summary.json", "k6")]:
         r = client.post("/api/v1/loadtest/parse", json={"content": (EXAMPLES / name).read_text()}).json()
@@ -68,6 +80,10 @@ def test_parse_and_validate():
         ("/api/v1/pattern", lambda: ex("pattern") | {"pattern": {"kind": "custom"}}),
         ("/api/v1/pattern", lambda: ex("pattern") | {"pattern": {"kind": "daily", "peakTps": 2000, "secondsPerHour": 60}}),
         ("/api/v1/loadtest/parse", lambda: {"content": "hello,world\n1,2"}),
+        ("/api/v1/fault", lambda: ex("fault") | {"fault": {"durationS": 30}}),
+        ("/api/v1/fault", lambda: ex("fault") | {"fault": {"nodesDown": 3}}),
+        ("/api/v1/sensitivity", lambda: ex("sensitivity") | {"params": ["bogus"]}),
+        ("/api/v1/assistant", lambda: ex("assistant") | {"question": "x" * 600}),
         ("/api/v1/validate", lambda: ex("validate") | {"points": [{"tps": 10, "p95Ms": 300}]}),
     ],
 )

@@ -11,12 +11,15 @@ import type { Service } from "@/lib/types";
 import { Logo } from "./icons";
 
 const NAV = [
-  { href: "/", label: "Overview" },
   { href: "/service/", label: "Service" },
   { href: "/evaluate/", label: "Evaluate" },
   { href: "/autosize/", label: "Auto-size" },
-  { href: "/patterns/", label: "Load patterns" },
+  { href: "/patterns/", label: "Patterns" },
+  { href: "/failures/", label: "Failures" },
+  { href: "/sensitivity/", label: "Sensitivity" },
   { href: "/validate/", label: "Validate" },
+  { href: "/workspace/", label: "Workspace" },
+  { href: "/ask/", label: "Ask" },
 ];
 
 type Engine = { state: "checking" } | { state: "up"; version: string; auth: boolean } | { state: "down" };
@@ -47,7 +50,11 @@ export function Header() {
         <div className="nav-wrap">
         <nav className="nav" aria-label="Main">
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href} aria-current={path === n.href || path + "/" === n.href ? "page" : undefined}>
+            <Link key={n.href} href={n.href} aria-current={
+                path === n.href || path + "/" === n.href || (n.href === "/workspace/" && /^\/(report|compare)/.test(path))
+                  ? "page"
+                  : undefined
+              }>
               {n.label}
             </Link>
           ))}

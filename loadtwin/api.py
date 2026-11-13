@@ -11,6 +11,8 @@ LOADTWIN_CORS_ORIGINS
     Comma-separated origins allowed by CORS; ``*`` by default.
 LOADTWIN_WEB_DIR
     Directory of the static dashboard build.
+LOADTWIN_LLM_API_KEY, LOADTWIN_LLM_MODEL, LOADTWIN_LLM_BASE_URL
+    Optional language model for ``/api/v1/assistant``; see ``loadtwin.assistant``.
 """
 
 from __future__ import annotations
@@ -27,25 +29,34 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from loadtwin import __version__
+from loadtwin.assistant import ask, llm_available
 from loadtwin.autosize import autosize
 from loadtwin.calibration import prepare
 from loadtwin.capacity import capacity
 from loadtwin.engine import seed_from, simulate
 from loadtwin.evaluate import evaluate
+from loadtwin.faults import run_fault
 from loadtwin.loadtest import PARSERS, detect, validate
 from loadtwin.models import (
+    EXAMPLE_ASSISTANT,
     EXAMPLE_AUTOSIZE,
     EXAMPLE_EVALUATE,
+    EXAMPLE_FAULT,
     EXAMPLE_PATTERN,
+    EXAMPLE_SENSITIVITY,
     EXAMPLE_SIMULATE,
     EXAMPLE_VALIDATE,
+    AssistantRequest,
     AutosizeRequest,
     EvaluateRequest,
+    FaultRequest,
     LoadtestFileIn,
     PatternRequest,
+    SensitivityRequest,
     SimulateRequest,
     ValidateRequest,
 )
+from loadtwin.sensitivity import PARAMS, sensitivity
 from loadtwin.traffic import run_pattern
 
 app = FastAPI(
@@ -62,6 +73,9 @@ app = FastAPI(
         "- `POST /api/v1/pattern`: daily, spike, ramp or custom load judged in 10-second windows.\n"
         "- `POST /api/v1/loadtest/parse` and `POST /api/v1/validate`: import k6, JMeter or Locust results "
         "and score the model against every measured point.\n"
+        "- `POST /api/v1/fault`: a node crash, a slow database or failing external calls, judged before, during and after.\n"
+        "- `POST /api/v1/sensitivity`: which input moves p95 the most (tornado chart data).\n"
+        "- `POST /api/v1/assistant`: a plain-language question becomes a scenario, runs, and is explained.\n"
         "- `POST /api/v1/simulate`: raw simulation of up to 10 loads.\n\n"
         "Source: https://github.com/adryanra97/loadtwin"
     ),
@@ -116,7 +130,12 @@ def health() -> dict:
     dict
         ``status``, ``version`` and ``auth`` (whether an API key is required).
     """
-    return {"status": "ok", "version": __version__, "auth": bool(os.environ.get("LOADTWIN_API_KEY"))}
+    return {
+        "status": "ok",
+        "version": __version__,
+        "auth": bool(os.environ.get("LOADTWIN_API_KEY")),
+        "assistant": "llm" if llm_available() else "rules",
+    }
 
 
 @meta.get("/v1/examples")
@@ -134,6 +153,9 @@ def examples() -> dict:
         "autosize": EXAMPLE_AUTOSIZE,
         "pattern": EXAMPLE_PATTERN,
         "validate": EXAMPLE_VALIDATE,
+        "fault": EXAMPLE_FAULT,
+        "sensitivity": EXAMPLE_SENSITIVITY,
+        "assistant": EXAMPLE_ASSISTANT,
     }
 
 
@@ -314,6 +336,97 @@ def validate_endpoint(req: ValidateRequest) -> dict:
         req.database.to_database(),
         req.payloadKb,
         req.seed,
+    )
+
+
+@twin.post("/fault")
+def fault_endpoint(req: FaultRequest) -> dict:
+    """Simulate a failure in the middle of a run and judge the service before, during and after it.
+
+    Parameters
+    ----------
+    req : FaultRequest
+        Service, constant load and the failure.
+
+    Returns
+    -------
+    dict
+        Verdict, reasons, failure, phases, recovery time, timeline of the healthy and the failed run,
+        calibration and ``durationS``.
+    """
+
+    def run() -> dict:
+        target = req.targetSpec.to_spec()
+        seed = req.seed if req.seed is not None else seed_from(req.model_dump(exclude={"seed"}))
+        profile, cal = prepare(
+            req.measuredSpec.to_spec(), req.measurement.to_measurement(), target, req.database.to_database(), seed
+        )
+        return run_fault(target, profile, req.tps, req.fault.to_fault(), req.sla.to_sla(), seed) | {"calibration": cal}
+
+    return _timed(run)
+
+
+@twin.post("/sensitivity")
+def sensitivity_endpoint(req: SensitivityRequest) -> dict:
+    """Move each input down and up and report how much p95 swings.
+
+    Parameters
+    ----------
+    req : SensitivityRequest
+        Service, peak load, step and optionally which inputs to vary.
+
+    Returns
+    -------
+    dict
+        Baseline, inputs sorted by p95 swing, advice, calibration and ``durationS``.
+
+    Raises
+    ------
+    fastapi.HTTPException
+        422 for an unknown input name.
+    """
+    unknown = [p for p in (req.params or []) if p not in PARAMS]
+    if unknown:
+        raise HTTPException(422, f"Unknown inputs: {', '.join(unknown)}. Choose from {', '.join(PARAMS)}.")
+    return _timed(
+        sensitivity,
+        req.measuredSpec.to_spec(),
+        req.measurement.to_measurement(),
+        req.targetSpec.to_spec(),
+        req.peakTps,
+        req.sla.to_sla(),
+        req.database.to_database(),
+        req.step,
+        req.params,
+        req.seed,
+    )
+
+
+@twin.post("/assistant")
+def assistant_endpoint(req: AssistantRequest) -> dict:
+    """Turn a question into a scenario, run it with SimPy and explain the result.
+
+    Parameters
+    ----------
+    req : AssistantRequest
+        The question and the current service.
+
+    Returns
+    -------
+    dict
+        How the question was read (``planSource``, ``tool``, ``changes``), the full simulation
+        ``result``, the ``facts`` the explanation may use, the ``explanation`` and its source.
+    """
+    return _timed(
+        ask,
+        req.question,
+        req.measuredSpec.to_spec(),
+        req.measurement.to_measurement(),
+        req.targetSpec.to_spec(),
+        req.normalTps,
+        req.peakTps,
+        req.sla.to_sla(),
+        req.database.to_database(),
     )
 
 

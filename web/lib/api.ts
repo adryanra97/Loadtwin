@@ -85,7 +85,7 @@ export async function post<T>(path: string, body: unknown, signal?: AbortSignal)
   throw new ApiError(detail, res.status);
 }
 
-export async function health(): Promise<{ status: string; version: string; auth: boolean }> {
+export async function health(): Promise<{ status: string; version: string; auth: boolean; assistant?: "llm" | "rules" }> {
   const res = await fetch(`${API_BASE}/api/health`, { cache: "no-store" });
   if (!res.ok) throw new Error(String(res.status));
   return res.json();

@@ -4,14 +4,19 @@
 
 LoadTwin is a discrete-event **digital twin** for capacity planning. Give it one load-test measurement from a small environment and the spec of the environment you care about, and it tells you whether that environment survives normal, peak and stress load: with a verdict, the limiting resource, the maximum sustainable load and the latency you should expect.
 
-It answers four questions, in a web dashboard, over HTTP or from the command line:
+It answers these questions in a web dashboard, over HTTP or from the command line:
 
 | Tool | Question | Answer |
 |---|---|---|
 | **Evaluate** | Does the target setup meet the SLA at peak, and how likely is it to break? | Verdict, limiting resource, capacity, breaking point, and a Monte Carlo breach probability. |
 | **Auto-size** | What is the cheapest cluster that carries my peak load? | Fewest nodes per machine type that pass, priced per month, with a headroom-safe recommendation. |
 | **Load patterns** | Does it survive a daily curve, a spike or a ramp? | Time over the SLA in 10-second windows, the worst moment and the recovery time. |
+| **Failures** | What happens when a node crashes, the database slows down or a dependency times out? | Before, during and after the failure against a healthy run with the same seed, and the recovery time. |
+| **Sensitivity** | Which setting moves p95 the most? | Each input moved down and up (vCPU, nodes, threads, connections, database, external and CPU time), ranked as a tornado chart, with what to change first. |
 | **Validate** | How far can I trust the model? | Import k6, JMeter or Locust results; calibrate on one level, predict the rest, and get a fit grade and validated range. |
+| **Ask** | "What if traffic doubles on payday?" | The question becomes a scenario, SimPy runs it, and the answer explains the result. Numbers always come from the simulation. |
+
+Saved scenarios live in a **workspace**, grouped by service: compare two side by side, print a report as PDF, or share it as a link (the report is compressed into the link itself; nothing is stored on a server).
 
 ```text
 $ loadtwin evaluate examples/evaluate-pass.json
@@ -89,6 +94,18 @@ loadtwin serve --port 8000       # same API as the Docker image
 
 Import the repository into Vercel and deploy; no settings are needed. `vercel.json` builds the dashboard as static files (`web/out`) and serves the API from one Python Function (`api/index.py`) under `/api`. Set `LOADTWIN_API_KEY` in the project's environment variables to require `Authorization: Bearer <key>` on `/api/v1/*`; the dashboard then asks for the key and keeps it only for the browser tab.
 
+### Optional language model for Ask
+
+Ask works without any AI service: questions in English or Indonesian are read with keyword rules ("2x", "naik 50%", "node mati", "database lambat 3x", "timeout 20%", "lonjakan", "parameter mana"), and the answer is assembled from the simulation's own findings. To let a language model read free-form questions and write the explanation, set:
+
+| Variable | Meaning |
+|---|---|
+| `LOADTWIN_LLM_API_KEY` | Anthropic API key. Leave unset to keep the keyword rules. |
+| `LOADTWIN_LLM_MODEL` | Model name (default `claude-haiku-5-5`). |
+| `LOADTWIN_LLM_BASE_URL` | API base URL (default `https://api.anthropic.com`). |
+
+The model only chooses the scenario; its plan is validated and clamped to the API limits before SimPy runs. Its explanation is checked: if it contains a number that is not in the simulation result, the plan or the question, it is discarded and the plain summary is shown instead.
+
 Heavy requests are bounded so each finishes well inside the function's 60-second limit (for example, Monte Carlo runs x peak load at most 6,000, and machine types x peak load at most 3,000 for auto-sizing).
 
 ## API
@@ -103,6 +120,9 @@ Heavy requests are bounded so each finishes well inside the function's 60-second
 | `POST` | `/api/v1/pattern` | Run a `daily`, `spike`, `ramp` or `custom` load pattern and judge it in 10-second windows. |
 | `POST` | `/api/v1/loadtest/parse` | Turn a k6 summary, JMeter results CSV or Locust stats history into load points. |
 | `POST` | `/api/v1/validate` | Calibrate on one point and score predictions against every other point. |
+| `POST` | `/api/v1/fault` | Inject a node crash, a slow database or failing/slow external calls and judge before, during and after. |
+| `POST` | `/api/v1/sensitivity` | p95 with each input moved down and up, sorted by swing, with advice. |
+| `POST` | `/api/v1/assistant` | Plain-language question to scenario, simulation and explanation. |
 | `POST` | `/api/v1/simulate` | Calibrate and simulate up to 10 loads, without SLA or verdict. |
 
 ```bash
@@ -157,7 +177,7 @@ CI runs lint, tests on Python 3.12 and 3.13, a type-check and build of the dashb
 
 ## Roadmap
 
-See [ROADMAP.md](ROADMAP.md): failure scenarios, sensitivity analysis, side-by-side comparison and reports.
+See [ROADMAP.md](ROADMAP.md).
 
 ## License
 

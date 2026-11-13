@@ -68,4 +68,8 @@ export const KEYS = {
   autosize: "loadtwin.autosize.v1",
   pattern: "loadtwin.pattern.v1",
   validate: "loadtwin.validate.v1",
+  fault: "loadtwin.fault.v1",
+  sensitivity: "loadtwin.sensitivity.v1",
+  assistant: "loadtwin.assistant.v1",
+  scenarios: "loadtwin.scenarios.v1",
 };

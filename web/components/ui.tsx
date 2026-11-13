@@ -139,14 +139,24 @@ export function VerdictBadge({ verdict }: { verdict: string }) {
   );
 }
 
-export function VerdictBanner({ verdict, title, children }: { verdict: Verdict; title?: string; children?: ReactNode }) {
+export function VerdictBanner({
+  verdict,
+  title,
+  plain,
+  children,
+}: {
+  verdict: Verdict;
+  title?: string;
+  plain?: string;
+  children?: ReactNode;
+}) {
   const v = VERDICT[verdict];
   return (
     <section className={`verdict tone-${v.tone}`} aria-label="Verdict">
       <span className="icon">{v.icon}</span>
       <h2>{title ?? v.label}</h2>
       <div className="stack-sm">
-        <p>{v.plain}</p>
+        <p>{plain ?? v.plain}</p>
         {children}
       </div>
     </section>

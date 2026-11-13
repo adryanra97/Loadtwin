@@ -16,15 +16,33 @@ const TOOLS = [
   },
   {
     href: "/patterns/",
-    title: "Load patterns",
+    title: "Patterns",
     q: "Does it survive a business day, a sudden spike or a steady ramp?",
     out: "Time over the SLA, the worst ten seconds, how long it takes to recover",
+  },
+  {
+    href: "/failures/",
+    title: "Failures",
+    q: "What happens when a node crashes, the database slows down or a dependency times out?",
+    out: "Before, during and after the failure against a healthy run, and the recovery time",
+  },
+  {
+    href: "/sensitivity/",
+    title: "Sensitivity",
+    q: "Which setting moves p95 the most: vCPU, nodes, threads or database time?",
+    out: "A ranking of every input by impact, and what to change first",
   },
   {
     href: "/validate/",
     title: "Validate",
     q: "How far can I trust the model? Import k6, JMeter or Locust results.",
     out: "Predicted against measured latency at every load level, and a trust grade",
+  },
+  {
+    href: "/ask/",
+    title: "Ask",
+    q: "“What if traffic doubles on payday?” Ask in plain words.",
+    out: "The question becomes a scenario, SimPy runs it, and the answer explains the numbers",
   },
 ];
 
@@ -53,7 +71,7 @@ export default function Home() {
       </section>
 
       <section aria-labelledby="tools-h" className="tools">
-        <h2 id="tools-h">Four questions it answers</h2>
+        <h2 id="tools-h">Questions it answers</h2>
         <ul className="tool-list">
           {TOOLS.map((t) => (
             <li key={t.href}>

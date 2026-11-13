@@ -23,7 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from loadtwin.autosize import DEFAULT_CATALOG, MachineType, Pools
 from loadtwin.calibration import Database, Measurement
-from loadtwin.engine import Spec
+from loadtwin.engine import Fault, Spec
 from loadtwin.evaluate import Load
 from loadtwin.loadtest import Point
 from loadtwin.sla import SLA
@@ -358,3 +358,112 @@ class ValidateRequest(_Model):
         if not any(p.cpuPct for p in self.points):
             raise ValueError("at least one point needs cpuPct (server CPU at that load) to calibrate on")
         return self
+
+
+class FaultIn(_Model):
+    """A failure to inject; combine any of them."""
+
+    nodesDown: Annotated[int, Field(ge=0, le=49, description="Nodes that crash during the failure.")] = 0
+    dbSlowdown: Annotated[float, Field(ge=1, le=20, description="Database time multiplier (3 = three times slower).")] = 1
+    extFailShare: Annotated[float, Field(ge=0, le=1, description="Share of external calls that hang and fail.")] = 0
+    extTimeoutMs: Annotated[float, Field(ge=100, le=30000, description="How long a hanging external call waits.")] = 2000
+    extSlowdown: Annotated[float, Field(ge=1, le=20, description="Time multiplier for external calls that succeed.")] = 1
+    durationS: Annotated[float, Field(ge=10, le=120, description="How long the failure lasts.")] = 40
+
+    def to_fault(self) -> Fault:
+        """Engine ``Fault`` starting at 0; the runner places it in the window."""
+        return Fault(0, self.durationS, self.nodesDown, self.dbSlowdown, self.extFailShare, self.extTimeoutMs, self.extSlowdown)
+
+    @model_validator(mode="after")
+    def _something(self) -> FaultIn:
+        """Require at least one failure."""
+        if not (self.nodesDown or self.dbSlowdown != 1 or self.extFailShare or self.extSlowdown != 1):
+            raise ValueError("choose at least one failure: nodesDown, dbSlowdown, extFailShare or extSlowdown")
+        return self
+
+
+EXAMPLE_FAULT = {
+    "measuredSpec": EXAMPLE_EVALUATE["measuredSpec"],
+    "measurement": EXAMPLE_EVALUATE["measurement"],
+    "targetSpec": EXAMPLE_EVALUATE["targetSpec"],
+    "tps": 45,
+    "fault": {"nodesDown": 1, "durationS": 40},
+    "sla": EXAMPLE_EVALUATE["sla"],
+    "database": EXAMPLE_EVALUATE["database"],
+}
+
+
+class FaultRequest(_Model):
+    """Input of ``POST /api/v1/fault``."""
+
+    model_config = ConfigDict(extra="forbid", json_schema_extra={"examples": [EXAMPLE_FAULT]})
+
+    measuredSpec: SpecIn
+    measurement: MeasurementIn
+    targetSpec: SpecIn
+    tps: Annotated[float, Field(gt=0, le=1000, description="Constant load during the run.")]
+    fault: FaultIn
+    sla: SLAIn = SLAIn()
+    database: DatabaseIn = DatabaseIn()
+    seed: Annotated[int | None, Field(ge=0)] = None
+
+    @model_validator(mode="after")
+    def _nodes(self) -> FaultRequest:
+        """Keep at least one node alive."""
+        if self.fault.nodesDown >= self.targetSpec.nodes:
+            raise ValueError("nodesDown must be smaller than targetSpec.nodes; at least one node has to stay up")
+        return self
+
+
+EXAMPLE_SENSITIVITY = {
+    "measuredSpec": EXAMPLE_EVALUATE["measuredSpec"],
+    "measurement": EXAMPLE_EVALUATE["measurement"],
+    "targetSpec": EXAMPLE_EVALUATE["targetSpec"],
+    "peakTps": 70,
+    "step": 0.25,
+    "sla": EXAMPLE_EVALUATE["sla"],
+    "database": EXAMPLE_EVALUATE["database"],
+}
+
+
+class SensitivityRequest(_Model):
+    """Input of ``POST /api/v1/sensitivity``."""
+
+    model_config = ConfigDict(extra="forbid", json_schema_extra={"examples": [EXAMPLE_SENSITIVITY]})
+
+    measuredSpec: SpecIn
+    measurement: MeasurementIn
+    targetSpec: SpecIn
+    peakTps: Annotated[float, Field(gt=0, le=600, description="Load to analyse.")]
+    step: Annotated[float, Field(ge=0.05, le=0.9, description="Relative change per input (0.25 = -25% and +25%).")] = 0.25
+    params: Annotated[list[str] | None, Field(max_length=7)] = None
+    sla: SLAIn = SLAIn()
+    database: DatabaseIn = DatabaseIn()
+    seed: Annotated[int | None, Field(ge=0)] = None
+
+
+EXAMPLE_ASSISTANT = {
+    "question": "What if traffic doubles on payday?",
+    "measuredSpec": EXAMPLE_EVALUATE["measuredSpec"],
+    "measurement": EXAMPLE_EVALUATE["measurement"],
+    "targetSpec": EXAMPLE_EVALUATE["targetSpec"],
+    "normalTps": 8,
+    "peakTps": 45,
+    "sla": EXAMPLE_EVALUATE["sla"],
+    "database": EXAMPLE_EVALUATE["database"],
+}
+
+
+class AssistantRequest(_Model):
+    """Input of ``POST /api/v1/assistant``."""
+
+    model_config = ConfigDict(extra="forbid", json_schema_extra={"examples": [EXAMPLE_ASSISTANT]})
+
+    question: Annotated[str, Field(min_length=3, max_length=500)]
+    measuredSpec: SpecIn
+    measurement: MeasurementIn
+    targetSpec: SpecIn
+    normalTps: Annotated[float, Field(gt=0, le=MAX_TPS)]
+    peakTps: Annotated[float, Field(gt=0, le=MAX_TPS)]
+    sla: SLAIn = SLAIn()
+    database: DatabaseIn = DatabaseIn()

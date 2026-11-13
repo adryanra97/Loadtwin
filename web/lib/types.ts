@@ -204,3 +204,81 @@ export type ValidateResult = {
   reasons: string[];
   durationS: number;
 };
+
+export type FaultIn = {
+  nodesDown: number;
+  dbSlowdown: number;
+  extFailShare: number;
+  extTimeoutMs: number;
+  extSlowdown: number;
+  durationS: number;
+};
+
+export type Phase = { requests: number; p95Ms: number | null; errorRatePct: number };
+
+export type FaultWindow = {
+  t: number;
+  p95Ms: number | null;
+  errorRatePct: number;
+  cpuPct: number;
+  threadPct: number;
+  throughputTps: number;
+  breach: boolean;
+  fault: boolean;
+  healthy: { p95Ms: number | null; errorRatePct: number; cpuPct: number };
+};
+
+export type FaultResult = {
+  verdict: Verdict;
+  reasons: string[];
+  failure: { description: string; startS: number; endS: number; tps: number };
+  phases: { before: Phase; during: Phase; after: Phase; healthyDuring: Phase };
+  recoverySeconds: number | null;
+  timeline: FaultWindow[];
+  durationS: number;
+};
+
+export type SensRun = { value: number; p95Ms: number; errorRatePct: number; cpuPct: number; meetsSla: boolean };
+export type SensitivityResult = {
+  peakTps: number;
+  step: number;
+  baseline: { p95Ms: number; errorRatePct: number; cpuPct: number; meetsSla: boolean };
+  params: {
+    param: string;
+    label: string;
+    unit: string;
+    base: number;
+    low: SensRun;
+    high: SensRun;
+    swingMs: number;
+    better: "low" | "high";
+    gainMs: number;
+  }[];
+  advice: string[];
+  durationS: number;
+};
+
+export type AssistantResult = {
+  planSource: "llm" | "rules";
+  tool: "evaluate" | "fault" | "pattern" | "sensitivity";
+  restated: string;
+  changes: string[];
+  peakTps: number;
+  targetSpec: Spec;
+  result: EvaluateResult | FaultResult | PatternResult | SensitivityResult;
+  facts: Record<string, unknown>;
+  explanation: string;
+  explanationSource: "llm" | "template";
+  notes: string[];
+  durationS: number;
+};
+
+export type SavedScenario = {
+  id: string;
+  name: string;
+  savedAt: string;
+  service: Service;
+  load: { normalTps: number; peakTps: number; stressMultipliers: number[] };
+  replications: number;
+  result: EvaluateResult;
+};

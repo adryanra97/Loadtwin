@@ -62,6 +62,8 @@ export function LineChart({
   xFormat = (x) => `${num(x)}`,
   threshold,
   bands = [],
+  bandLabel = "SLA breached",
+  bandColor = "var(--breach)",
   label,
   yMax,
 }: {
@@ -72,6 +74,8 @@ export function LineChart({
   xFormat?: (x: number) => string;
   threshold?: { y: number; label: string };
   bands?: { x0: number; x1: number; label?: string }[];
+  bandLabel?: string;
+  bandColor?: string;
   label: string;
   yMax?: number;
 }) {
@@ -115,7 +119,7 @@ export function LineChart({
   const xt = niceTicks(x0, x1, W < 420 ? 3 : 6);
   return (
     <figure className="chart" style={{ margin: 0 }}>
-      {series.length > 1 && (
+      {(series.length > 1 || bands.length > 0) && (
         <div className="legend" aria-hidden>
           {series.map((s) => (
             <span key={s.name}>
@@ -125,8 +129,8 @@ export function LineChart({
           ))}
           {bands.length > 0 && (
             <span>
-              <span className="sw block" style={{ background: "var(--breach)", outline: "1px solid var(--bad)" }} />
-              SLA breached
+              <span className="sw block" style={{ background: bandColor, outline: "1px solid var(--line-strong)" }} />
+              {bandLabel}
             </span>
           )}
         </div>
@@ -142,7 +146,7 @@ export function LineChart({
       >
         <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="img" aria-label={label}>
           {bands.map((b, i) => (
-            <rect key={i} x={sx(b.x0)} y={PAD.t} width={Math.max(sx(b.x1) - sx(b.x0), 1)} height={H - PAD.t - PAD.b} fill="var(--breach)" />
+            <rect key={i} x={sx(b.x0)} y={PAD.t} width={Math.max(sx(b.x1) - sx(b.x0), 1)} height={H - PAD.t - PAD.b} fill={bandColor} />
           ))}
           <g className="grid axis">
             {ticks(top).map((t) => (

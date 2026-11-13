@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 (2026-11-13)
+
+- **Failure scenarios** (`/api/v1/fault`, dashboard *Failures*): crash nodes, slow the database, or make external calls hang and fail or slow down, for part of the run. The failed run is compared with a healthy run on the same seed, phase by phase (before, during, after), with the recovery time. Requests lost on a crashed node count as errors at the moment of the crash.
+- **Sensitivity analysis** (`/api/v1/sensitivity`, dashboard *Sensitivity*): vCPU, nodes, worker threads, DB connections, database, external and CPU time are each moved down and up with common random numbers; the tornado chart ranks them by p95 swing and the advice names what to change first.
+- **Workspace**: save evaluations as scenarios per service, compare two side by side with the better value marked, print a report or comparison as PDF, and share a report as a self-contained link.
+- **Ask** (`/api/v1/assistant`, dashboard *Ask*): plain-language what-if questions become a scenario that SimPy runs. Keyword rules in English and Indonesian work out of the box; an optional language model reads free-form questions and explains the result, and its explanation is rejected if it uses a number the simulation did not produce.
+- `/api/health` reports whether Ask uses a language model or keyword rules.
+
 ## 0.2.0 (2026-11-13)
 
 - **Web dashboard** (Next.js static export) served from the same origin as the API, on Vercel and in Docker: service setup with JSON export/import, Evaluate, Auto-size, Load patterns and Validate, with inline validation, run progress and cancel, charts with hover details, mobile and dark mode.

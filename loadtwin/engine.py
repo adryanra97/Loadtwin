@@ -173,6 +173,45 @@ class Profile:
 
 
 @dataclass
+class Fault:
+    """A failure injected for part of the measurement window.
+
+    Times are seconds from the start of the measurement window (after the warm-up).
+
+    Attributes
+    ----------
+    start_s : float
+        When the failure starts.
+    end_s : float
+        When it ends; ``math.inf`` keeps it until the end of the run.
+    nodes_down : int, default 0
+        Nodes that crash. The load balancer stops routing to them at once; requests already on
+        them are lost and count as errors. They come back at ``end_s``.
+    db_slowdown : float, default 1
+        Multiplier on database time per query (2 = queries take twice as long).
+    ext_fail_share : float, default 0
+        Share of calls to external dependencies that hang until ``ext_timeout_ms`` and then fail
+        the request.
+    ext_timeout_ms : float, default 2000
+        Client timeout for an external call that hangs.
+    ext_slowdown : float, default 1
+        Multiplier on the time of external calls that do not fail.
+    """
+
+    start_s: float
+    end_s: float = math.inf
+    nodes_down: int = 0
+    db_slowdown: float = 1.0
+    ext_fail_share: float = 0.0
+    ext_timeout_ms: float = 2000.0
+    ext_slowdown: float = 1.0
+
+    def active(self, t: float) -> bool:
+        """Whether the failure is in effect at simulation time ``t`` (warm-up included)."""
+        return WARMUP_S + self.start_s <= t < WARMUP_S + self.end_s
+
+
+@dataclass
 class SimulationResult:
     """Output of one simulation run.
 
@@ -187,11 +226,15 @@ class SimulationResult:
     latency_breakdown_ms : dict
         Mean time per request spent in each stage: thread queue, CPU queue, CPU, connection queue,
         database and external dependencies.
+    events : list of tuple
+        ``(arrival_s, latency_ms or None)`` for every measured request, ``None`` meaning it failed.
+        Times are relative to the start of the measurement window. Used to judge phases of a run.
     """
 
     summary: dict
     timeseries: list = field(default_factory=list)
     latency_breakdown_ms: dict = field(default_factory=dict)
+    events: list = field(default_factory=list)
 
 
 def seed_from(*parts) -> int:
@@ -240,6 +283,7 @@ def simulate(
     seed: int,
     duration_s: float = DURATION_S,
     schedule: list[tuple[float, float]] | None = None,
+    fault: Fault | None = None,
 ) -> SimulationResult:
     """Run one discrete-event simulation at a constant or piecewise-constant arrival rate.
 
@@ -258,6 +302,9 @@ def simulate(
     schedule : list of (float, float), optional
         Time-varying load as ``(duration_s, tps)`` segments after the warm-up. The warm-up runs at
         the first segment's rate, and ``tps`` is then only used for the summary.
+    fault : Fault, optional
+        Failure injected for part of the window: crashed nodes, a slow database, or external
+        dependencies that hang.
 
     Returns
     -------
@@ -294,11 +341,16 @@ def simulate(
             self.cpu = simpy.Resource(env, capacity=spec.vcpu)
             self.conns = simpy.Resource(env, capacity=spec.conn_pool)
             self.inflight = 0
+            self.alive = True
+            self.epoch = 0
+            self.died_at = 0.0
 
     nodes = [Node() for _ in range(spec.nodes)]
     db = simpy.Resource(env, capacity=profile.db_capacity) if profile.db_capacity > 0 else None
     db_busy = [0.0]
-    st = {"arrived": 0, "completed": 0, "rejected": 0, "connection_failed": 0, "timeouts": 0}
+    st = {"arrived": 0, "completed": 0, "rejected": 0, "connection_failed": 0, "timeouts": 0, "lost": 0, "dependency_failed": 0}
+    events: list[tuple[float, float | None]] = []
+    b_alive = [0.0] * nbucket
     latencies: list[float] = []
     stages = {"thread_queue": 0.0, "cpu_queue": 0.0, "cpu": 0.0, "connection_queue": 0.0, "database": 0.0, "external": 0.0}
     b_lat: list[list[float]] = [[] for _ in range(nbucket)]
@@ -348,10 +400,18 @@ def simulate(
         measured = t0 >= WARMUP_S
         st["arrived"] += 1 if measured else 0
         b_arr[bucket(t0)] += 1
-        if len(node.threads.queue) >= spec.thread_pool * QUEUE_FACTOR:
-            b_fail[bucket(t0)] += 1
+        epoch = node.epoch
+
+        def fail(kind: str, at: float | None = None) -> None:
+            """Count this request as failed for reason ``kind``, at its arrival or at ``at``."""
+            t = t0 if at is None else max(t0, at)
+            b_fail[bucket(t)] += 1
             if measured:
-                st["rejected"] += 1
+                st[kind] += 1
+                events.append((t - WARMUP_S, None))
+
+        if len(node.threads.queue) >= spec.thread_pool * QUEUE_FACTOR:
+            fail("rejected")
             return
         rec = dict.fromkeys(stages, 0.0)
         with node.threads.request() as th:
@@ -365,11 +425,11 @@ def simulate(
                 rec["connection_queue"] = env.now - t1
                 if cn not in got:
                     node.inflight -= 1
-                    b_fail[bucket(t0)] += 1
-                    if measured:
-                        st["connection_failed"] += 1
+                    fail("connection_failed")
                     return
                 d = rng.lognormvariate(math.log(max(profile.db_ms, 0.1)) - 0.08, 0.4) / 1000.0
+                if fault is not None and fault.db_slowdown != 1 and fault.active(env.now):
+                    d *= fault.db_slowdown
                 if db is None:
                     yield env.timeout(d)
                     rec["database"] = d
@@ -383,15 +443,27 @@ def simulate(
                     rec["database"] = env.now - t2
             if profile.ext_ms > 0:
                 e = rng.lognormvariate(math.log(profile.ext_ms) - 0.08, 0.4) / 1000.0
+                if fault is not None and fault.active(env.now) and (fault.ext_fail_share > 0 or fault.ext_slowdown != 1):
+                    if fault.ext_fail_share > 0 and rng.random() < fault.ext_fail_share:
+                        yield env.timeout(fault.ext_timeout_ms / 1000.0)
+                        node.inflight -= 1
+                        fail("dependency_failed")
+                        return
+                    e *= fault.ext_slowdown
                 yield env.timeout(e)
                 rec["external"] = e
             yield from cpu_work(node, profile.cpu_ms * 0.4, rec)
             node.inflight -= 1
+        if node.epoch != epoch:
+            # Lost when the node crashed: count it then, not when it arrived.
+            fail("lost", node.died_at)
+            return
         lat = env.now - t0
         b_bytes[bucket(env.now)] += profile.payload_kb * 2 * 1024 * 8
         if lat * 1000 > spec.timeout_ms:
             b_fail[bucket(t0)] += 1
         if measured:
+            events.append((t0 - WARMUP_S, lat * 1000))
             st["completed"] += 1
             latencies.append(lat * 1000)
             b_lat[bucket(env.now)].append(lat * 1000)
@@ -460,8 +532,36 @@ def simulate(
                 yield env.timeout(end - env.now)
                 continue
             yield env.timeout(dt)
-            env.process(request(nodes[i % len(nodes)]))
+            up = [n for n in nodes if n.alive]
+            if not up:
+                b_arr[bucket(env.now)] += 1
+                b_fail[bucket(env.now)] += 1
+                if env.now >= WARMUP_S:
+                    st["arrived"] += 1
+                    st["rejected"] += 1
+                    events.append((env.now - WARMUP_S, None))
+                continue
+            env.process(request(up[i % len(up)]))
             i += 1
+
+    def crash():
+        """Take ``fault.nodes_down`` nodes out of rotation for the fault window, then bring them back.
+
+        Yields
+        ------
+        simpy.events.Timeout
+            Waits until the start and the end of the failure.
+        """
+        yield env.timeout(WARMUP_S + fault.start_s)
+        down = nodes[len(nodes) - min(fault.nodes_down, len(nodes)) :]
+        for n in down:
+            n.alive = False
+            n.epoch += 1
+            n.died_at = env.now
+        if math.isfinite(fault.end_s):
+            yield env.timeout(fault.end_s - fault.start_s)
+            for n in down:
+                n.alive = True
 
     def monitor():
         """Sample thread, connection and memory usage every ``SAMPLE_S`` seconds.
@@ -473,10 +573,12 @@ def simulate(
         """
         while True:
             b = bucket(env.now)
-            busy_t = sum(n.threads.count for n in nodes) / (spec.thread_pool * spec.nodes)
-            busy_c = sum(n.conns.count for n in nodes) / (spec.conn_pool * spec.nodes)
-            queued = sum(len(n.threads.queue) for n in nodes) / spec.nodes
-            inflight = sum(n.inflight for n in nodes) / spec.nodes
+            up = [n for n in nodes if n.alive] or nodes
+            busy_t = sum(n.threads.count for n in up) / (spec.thread_pool * len(up))
+            busy_c = sum(n.conns.count for n in up) / (spec.conn_pool * len(up))
+            queued = sum(len(n.threads.queue) for n in up) / len(up)
+            inflight = sum(n.inflight for n in up) / len(up)
+            b_alive[b] += len(up)
             mem = (
                 profile.base_mem_gb
                 + profile.leak_gb
@@ -500,14 +602,17 @@ def simulate(
             env.process(batch_job(n, min(batch_cores, spec.vcpu - 1)))
     env.process(arrivals())
     env.process(monitor())
+    if fault is not None and fault.nodes_down > 0:
+        env.process(crash())
     env.run(until=total)
 
-    cpu_cap = spec.vcpu * spec.nodes * BUCKET_S
-    net_cap = spec.bandwidth_mbps * 1e6 * spec.nodes * BUCKET_S
     series = []
     for i in range(nbucket):
         n = max(b_n[i], 1)
-        batch_part = batch_cores * spec.nodes * BUCKET_S if batch_cores else 0
+        alive = b_alive[i] / n if b_n[i] else spec.nodes
+        cpu_cap = spec.vcpu * alive * BUCKET_S
+        net_cap = spec.bandwidth_mbps * 1e6 * alive * BUCKET_S
+        batch_part = batch_cores * alive * BUCKET_S if batch_cores else 0
         series.append(
             {
                 "t": round((i + 1) * BUCKET_S - WARMUP_S, 1),
@@ -529,7 +634,7 @@ def simulate(
         return round(sum(d[key] for d in window) / max(len(window), 1), 1)
 
     arrived = max(st["arrived"], 1)
-    failed = st["rejected"] + st["connection_failed"] + st["timeouts"]
+    failed = st["rejected"] + st["connection_failed"] + st["timeouts"] + st["lost"] + st["dependency_failed"]
     stuck = sum(len(n.threads.queue) for n in nodes)
     err = 100 * (failed + stuck) / arrived + profile.base_error_pct
     ok = max(st["completed"], 1)
@@ -550,7 +655,9 @@ def simulate(
         "timeoutPct": round(100 * st["timeouts"] / arrived, 2),
         "rejected": st["rejected"],
         "connectionFailures": st["connection_failed"],
+        "lostRequests": st["lost"],
+        "dependencyFailures": st["dependency_failed"],
         "requests": st["arrived"],
     }
     breakdown = {k: round(v / ok * 1000, 1) for k, v in stages.items()}
-    return SimulationResult(summary=summary, timeseries=series, latency_breakdown_ms=breakdown)
+    return SimulationResult(summary=summary, timeseries=series, latency_breakdown_ms=breakdown, events=events)

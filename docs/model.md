@@ -97,11 +97,29 @@ A pattern becomes back-to-back segments of constant rate: `daily` uses a fixed 2
 
 Load tools do not record server CPU, so the user supplies it for at least one point. The model calibrates on that point (by default the one nearest the median load) and predicts p95 at every other point. The grade is the mean absolute p95 error over the other points: up to 10% `good`, up to 25% `fair`, above `poor`. The validated range spans the loads where the error is at most 25%.
 
-## 10. Limitations
+## 10. Failure scenarios
+
+A failure is active for a window in the middle of a run: 20 s healthy, the failure (10 to 120 s), then 30 s to recover, all at a constant load. The same run is simulated without the failure using the same seed, so differences come from the failure.
+
+- **Node crash**: the load balancer stops routing to the crashed nodes immediately. Requests in flight on them are lost and counted as errors at the moment of the crash. CPU and pool utilization are computed over the nodes still up. The nodes return when the failure ends.
+- **Slow database**: each query's time is multiplied while the failure is active (queue time at a shared database grows on top).
+- **External dependency**: a share of external calls hangs for the client timeout and fails the request; or calls succeed but take longer.
+
+Phases are judged on p95 and error rate of the requests that arrived in them. `PASS` when neither the failure nor the recovery breaks the SLA and no 10-second window does; `PASS_WITH_CONDITIONS` when the phases hold but some windows break; `FAIL` when the SLA breaks during the failure, or the recovery does not finish within 30 s.
+
+## 11. Sensitivity analysis
+
+At a given load, each input is moved down and up by the same relative step (25% by default; whole numbers move by at least one) while every other input stays the same, and the run is repeated with the same seed (common random numbers). Changing vCPU per node also changes CPU time per request through the scalability law. Inputs are ranked by the p95 swing between the two runs. Advice names the two changes that lower p95 the most, and the inputs that barely matter at that load.
+
+## 12. Ask
+
+A question becomes a plan: one of evaluate, fault, pattern or sensitivity, plus a load change, cluster changes, a failure or a pattern. With `LOADTWIN_LLM_API_KEY` set, a language model produces the plan through a tool call with a fixed schema; otherwise keyword rules do (English and Indonesian). The plan is validated and clamped to the API limits before it runs. The language model's explanation sees only a compact summary of the result and is rejected when it contains a number absent from the result, the plan or the question.
+
+## 13. Limitations
 
 - One measurement point calibrates the model (use Validate to check it against more). Behaviour far above the measured load, especially where locks or caches change regime, is extrapolated; the far-extrapolation rule only partly guards against it.
 - The USL coefficients are generic defaults, not fitted to your service.
-- Arrivals are Poisson within each segment. Correlated bursts and client retries are not modelled.
+- Arrivals are Poisson within each segment. Correlated bursts, client retries and circuit breakers are not modelled, so failure scenarios may be optimistic when clients retry aggressively.
 - A single service is modelled. Downstream services appear only as an external wait time.
 - Memory is modelled as baseline plus per-request usage; leaks and batch jobs exist in the engine but are not yet exposed in the API.
 
