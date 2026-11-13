@@ -84,6 +84,6 @@ export function TwinArchitecture() {
       <div className="ed-arch-secondary"><div><span>P95 LATENCY</span><strong>{data.p95}<small> ms</small></strong></div><div><span>THROUGHPUT</span><strong>{data.load}<small> req/s</small></strong></div></div>
     </div>
 
-    <figcaption className="ed-architecture-caption"><span className="ed-arch-caption-dot" aria-hidden="true" /><p><strong>{data.status}.</strong> {data.message}</p></figcaption>
+    <figcaption className="ed-architecture-caption" aria-live="polite" aria-atomic="true"><span className="ed-arch-caption-dot" aria-hidden="true" /><p><strong>{data.status}.</strong> {data.message}</p></figcaption>
   </figure>;
 }
