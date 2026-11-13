@@ -2,6 +2,8 @@
 
 import { LineChart } from "@/components/charts";
 import { RunBar, useRun } from "@/components/run";
+import { PendingStage, TwinStage } from "@/components/twin-stage";
+import { breachBands, faultFrames } from "@/lib/replay";
 import { ServiceStrip, useService } from "@/components/shell";
 import { NumberField, Stat, VerdictBanner } from "@/components/ui";
 import { check, type FieldDef } from "@/lib/fields";
@@ -157,16 +159,8 @@ export default function FailuresPage() {
         <section id="results" style={{ scrollMarginTop: 120 }} aria-label="Results" aria-busy={r.running} className="stack">
           {r.result ? (
             <Results res={r.result} sla={svc.sla} stale={r.running} />
-          ) : r.running ? (
-            <div className="stack">
-              <div className="skeleton" style={{ height: 110 }} />
-              <div className="skeleton" style={{ height: 300 }} />
-            </div>
           ) : (
-            <div className="card stack-sm empty">
-              <h2>No result yet</h2>
-              <p className="muted">Pick a failure and run it. “A node crashes” is a good first test of N+1 redundancy.</p>
-            </div>
+            <PendingStage nodes={svc.targetSpec.nodes} running={r.running} idleText={<>Pick a failure and run it. “A node crashes” is a good first test of N+1 redundancy.</>} />
           )}
         </section>
       </div>
@@ -174,7 +168,16 @@ export default function FailuresPage() {
   );
 }
 
-function Results({ res, sla, stale }: { res: FaultResult; sla: { maxP95Ms: number; maxErrorRatePct: number }; stale: boolean }) {
+function Results({
+  res,
+  sla,
+  stale,
+}: {
+  res: FaultResult;
+  sla: { maxP95Ms: number; maxErrorRatePct: number; maxCpuPct: number };
+  stale: boolean;
+}) {
+  const frames = faultFrames(res);
   const band = [{ x0: res.failure.startS, x1: res.failure.endS }];
   const tl = res.timeline;
   const ph = res.phases;
@@ -197,6 +200,18 @@ function Results({ res, sla, stale }: { res: FaultResult; sla: { maxP95Ms: numbe
           ))}
         </ul>
       </VerdictBanner>
+      <div className="card">
+        <TwinStage
+          title="Replay of the failure"
+          nodes={res.failure.nodes}
+          frames={frames}
+          slaP95={sla.maxP95Ms}
+          slaCpu={sla.maxCpuPct}
+          speedHint={6}
+          bands={[{ x0: res.failure.startS, x1: res.failure.endS, kind: "fault" }, ...breachBands(frames, 10)]}
+          caption="Watch the failure hit: crashed nodes go grey and their traffic moves to the rest, a slow database pulses amber, a failing dependency turns red. The amber stretch on the timeline is the failure."
+        />
+      </div>
       <div className="stats">
         <Stat
           k="p95 during the failure"
@@ -280,7 +295,7 @@ function Results({ res, sla, stale }: { res: FaultResult; sla: { maxP95Ms: numbe
           </table>
         </div>
         <p className="hint" style={{ marginTop: 8 }}>
-          Requests in flight on a crashed node are lost and count as errors in the phase they arrived in.
+          Requests in flight on a crashed node are lost and count as errors at the moment of the crash.
         </p>
       </div>
     </div>

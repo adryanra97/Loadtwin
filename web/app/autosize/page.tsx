@@ -3,6 +3,8 @@
 import { BarList } from "@/components/charts";
 import { Trash } from "@/components/icons";
 import { RunBar, useRun } from "@/components/run";
+import { AutosizeStage } from "@/components/option-stages";
+import { PendingStage } from "@/components/twin-stage";
 import { ServiceStrip, useService } from "@/components/shell";
 import { Notice, NumberField, Stat } from "@/components/ui";
 import { DEFAULT_CATALOG, LIMITS } from "@/lib/defaults";
@@ -226,17 +228,9 @@ export default function AutosizePage() {
         </aside>
         <section id="results" style={{ scrollMarginTop: 120 }} aria-label="Results" aria-busy={r.running} className="stack">
           {r.result ? (
-            <Results res={r.result} stale={r.running} />
-          ) : r.running ? (
-            <div className="stack">
-              <div className="skeleton" style={{ height: 150 }} />
-              <div className="skeleton" style={{ height: 300 }} />
-            </div>
+            <Results res={r.result} stale={r.running} sla={svc.sla} />
           ) : (
-            <div className="card stack-sm" style={{ textAlign: "center", padding: 40 }}>
-              <h2>No result yet</h2>
-              <p className="muted">Set the peak load and the machine types you can buy, then search.</p>
-            </div>
+            <PendingStage nodes={svc.targetSpec.nodes} running={r.running} idleText={<>Set the peak load and the machine types you can buy, then search.</>} />
           )}
         </section>
       </div>
@@ -248,7 +242,7 @@ function machineLabel(m: MachineType) {
   return `${m.name} (${m.vcpu} vCPU, ${num(m.ramGb)} GB)`;
 }
 
-function Results({ res, stale }: { res: AutosizeResult; stale: boolean }) {
+function Results({ res, stale, sla }: { res: AutosizeResult; stale: boolean; sla: { maxP95Ms: number; maxCpuPct: number } }) {
   const rec = res.recommended;
   const fits = res.options.filter((o) => o.fits);
   return (
@@ -285,6 +279,8 @@ function Results({ res, stale }: { res: AutosizeResult; stale: boolean }) {
       )}
 
       {rec && res.notes.length > 0 && <Notice>{res.notes.join(" ")}</Notice>}
+
+      {rec && <AutosizeStage res={res} slaP95={sla.maxP95Ms} slaCpu={sla.maxCpuPct} />}
 
       {res.cheapest && rec && (
         <div className="stats">

@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { TwinStage } from "@/components/twin-stage";
 import { VerdictBadge } from "@/components/ui";
+import { evaluateFrames } from "@/lib/replay";
 import { num, resourceName } from "@/lib/format";
 import { formatDate, useScenarios } from "@/lib/scenarios";
 import type { SavedScenario } from "@/lib/types";
@@ -139,6 +141,15 @@ export default function ComparePage() {
             <p className="small muted">
               {s.service.name}, saved {formatDate(s.savedAt)}
             </p>
+            <TwinStage
+              nodes={s.service.targetSpec.nodes}
+              frames={evaluateFrames(s.result, s.service.sla)}
+              maxTps={Math.max(a.load.peakTps, b.load.peakTps)}
+              slaP95={s.service.sla.maxP95Ms}
+              slaCpu={s.service.sla.maxCpuPct}
+              height={190}
+              speedHint={5}
+            />
             <ul className="reasons small">
               {s.result.reasons.slice(0, 3).map((x) => (
                 <li key={x}>{x}</li>

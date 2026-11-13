@@ -1,6 +1,8 @@
 "use client";
 
 import { RunBar, useRun } from "@/components/run";
+import { SensitivityStage } from "@/components/option-stages";
+import { PendingStage } from "@/components/twin-stage";
 import { ServiceStrip, useService } from "@/components/shell";
 import { NumberField, Stat } from "@/components/ui";
 import { check, type FieldDef } from "@/lib/fields";
@@ -111,14 +113,9 @@ export default function SensitivityPage() {
         </aside>
         <section id="results" style={{ scrollMarginTop: 120 }} aria-label="Results" aria-busy={r.running} className="stack">
           {r.result ? (
-            <Results res={r.result} slaP95={svc.sla.maxP95Ms} stale={r.running} />
-          ) : r.running ? (
-            <div className="skeleton" style={{ height: 380 }} />
+            <Results res={r.result} slaP95={svc.sla.maxP95Ms} stale={r.running} nodes={svc.targetSpec.nodes} />
           ) : (
-            <div className="card stack-sm empty">
-              <h2>No result yet</h2>
-              <p className="muted">Set the load and press Analyse. A load close to your limit shows the clearest differences.</p>
-            </div>
+            <PendingStage nodes={svc.targetSpec.nodes} running={r.running} idleText={<>Set the load and press Analyse. A load close to your limit shows the clearest differences.</>} />
           )}
         </section>
       </div>
@@ -126,7 +123,7 @@ export default function SensitivityPage() {
   );
 }
 
-function Results({ res, slaP95, stale }: { res: SensitivityResult; slaP95: number; stale: boolean }) {
+function Results({ res, slaP95, stale, nodes }: { res: SensitivityResult; slaP95: number; stale: boolean; nodes: number }) {
   const pct0 = Math.round(res.step * 100);
   const base = res.baseline.p95Ms;
   const all = res.params.flatMap((p) => [p.low.p95Ms, p.high.p95Ms]);
@@ -192,6 +189,7 @@ function Results({ res, slaP95, stale }: { res: SensitivityResult; slaP95: numbe
         </ul>
         <p className="hint">Values below each name: −{pct0}%, current, +{pct0}%. A › mark means the bar runs past the scale.</p>
       </div>
+      <SensitivityStage res={res} nodes={nodes} slaP95={slaP95} />
       {res.advice.length > 0 && (
         <div className="card stack-sm">
           <h2>What to change first</h2>

@@ -3,6 +3,8 @@
 import { LineChart } from "@/components/charts";
 import { Trash } from "@/components/icons";
 import { RunBar, useRun } from "@/components/run";
+import { PendingStage, TwinStage } from "@/components/twin-stage";
+import { breachBands, patternFrames } from "@/lib/replay";
 import { ServiceStrip, useService } from "@/components/shell";
 import { NumberField, Segmented, Stat, VerdictBanner } from "@/components/ui";
 import { DEFAULT_PATTERN, LIMITS, patternSegments } from "@/lib/defaults";
@@ -249,17 +251,9 @@ export default function PatternsPage() {
         </aside>
         <section id="results" style={{ scrollMarginTop: 120 }} aria-label="Results" aria-busy={r.running} className="stack">
           {r.result ? (
-            <Results res={r.result} sla={svc.sla} stale={r.running} />
-          ) : r.running ? (
-            <div className="stack">
-              <div className="skeleton" style={{ height: 110 }} />
-              <div className="skeleton" style={{ height: 320 }} />
-            </div>
+            <Results res={r.result} sla={svc.sla} stale={r.running} nodes={svc.targetSpec.nodes} />
           ) : (
-            <div className="card stack-sm" style={{ textAlign: "center", padding: 40 }}>
-              <h2>No result yet</h2>
-              <p className="muted">Pick a pattern, check the preview, then run it.</p>
-            </div>
+            <PendingStage nodes={svc.targetSpec.nodes} running={r.running} idleText={<>Pick a pattern, check the preview, then run it.</>} />
           )}
         </section>
       </div>
@@ -267,7 +261,18 @@ export default function PatternsPage() {
   );
 }
 
-function Results({ res, sla, stale }: { res: PatternResult; sla: { maxP95Ms: number; maxCpuPct: number }; stale: boolean }) {
+function Results({
+  res,
+  sla,
+  stale,
+  nodes,
+}: {
+  res: PatternResult;
+  sla: { maxP95Ms: number; maxCpuPct: number };
+  stale: boolean;
+  nodes: number;
+}) {
+  const frames = patternFrames(res);
   const W = 10;
   const bands: { x0: number; x1: number }[] = [];
   for (const w of res.windows) {
@@ -286,6 +291,17 @@ function Results({ res, sla, stale }: { res: PatternResult; sla: { maxP95Ms: num
           ))}
         </ul>
       </VerdictBanner>
+      <div className="card">
+        <TwinStage
+          title="Replay of the pattern"
+          nodes={nodes}
+          frames={frames}
+          slaP95={sla.maxP95Ms}
+          slaCpu={sla.maxCpuPct}
+          bands={breachBands(frames, 10)}
+          caption="Each dot is a request. Node fill is CPU, ticks in front of a node are waiting requests, red dots fail. The values are the simulation's, window by window."
+        />
+      </div>
       <div className="stats">
         <Stat k="Time over the SLA" v={seconds(res.breachSeconds)} s={`${pct(res.breachShare * 100)} of the pattern`} />
         <Stat

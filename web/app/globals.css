@@ -1439,3 +1439,139 @@ td.better::after {
     overflow: visible;
   }
 }
+
+/* ---------- Twin stage (animated replay) ---------- */
+.stage {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.stage-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.stage-title {
+  font-family: var(--display);
+  font-weight: 650;
+  font-size: 1.15rem;
+}
+.stage-busy {
+  animation: busy 1.2s ease-in-out infinite;
+}
+@keyframes busy {
+  50% {
+    opacity: 0.45;
+  }
+}
+.stage-body {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background-color: var(--surface);
+  background-image: radial-gradient(var(--line) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+.stage-canvas {
+  display: block;
+  width: 100%;
+  font-family: var(--font);
+}
+.hero-stage .stage-body {
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--line);
+}
+.hero-stage .stage {
+  gap: 0;
+}
+.stage-readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 22px;
+  margin: 0;
+  align-items: end;
+}
+.stage-readout dt {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.stage-readout dd {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 650;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  min-width: 4.5ch;
+}
+.stage-state {
+  margin-left: auto;
+  align-self: center;
+}
+.stage-state dd {
+  font-family: var(--font);
+  font-size: 0.85rem;
+}
+.stage-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.stage-controls .btn {
+  min-width: 64px;
+}
+.stage-scrub {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.stage-scrub input {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: transparent;
+}
+.stage-bands {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 50%;
+  height: 10px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.stage-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 3px;
+}
+.stage-band.breach {
+  background: color-mix(in srgb, var(--bad) 35%, transparent);
+}
+.stage-band.fault {
+  background: color-mix(in srgb, var(--warn) 45%, transparent);
+}
+.stage-speed {
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  min-height: 32px;
+}
+.stage-caption {
+  margin: 0;
+}
+@media (max-width: 520px) {
+  .stage-state {
+    margin-left: 0;
+  }
+}

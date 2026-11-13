@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useService } from "@/components/shell";
+import { TwinStage } from "@/components/twin-stage";
 import { FieldGroup, Notice } from "@/components/ui";
 import { EXAMPLE_SERVICE } from "@/lib/defaults";
 import { checkAll, DATABASE_FIELDS, MEASUREMENT_FIELDS, SLA_FIELDS, SPEC_FIELDS } from "@/lib/fields";
@@ -82,6 +83,27 @@ export default function ServicePage() {
           One measurement from a load test is enough to build the twin. Every tool uses what you enter here, and it stays in
           this browser.
         </p>
+      </div>
+
+      <div className="card">
+        <TwinStage
+          title="Your load test, as you measured it"
+          nodes={Math.max(Number(draft.measuredSpec.nodes) || 1, 1)}
+          frames={[
+            {
+              t: 0,
+              tps: Number(draft.measurement.tps) || 0,
+              cpu: Number(draft.measurement.cpuPct) || 0,
+              p95: Number(draft.measurement.p95Ms) || 0,
+              err: Number(draft.measurement.errorRatePct) || 0,
+            },
+          ]}
+          maxTps={Math.max((Number(draft.measurement.tps) || 1) * 2, 1)}
+          slaP95={Number(draft.sla.maxP95Ms) || undefined}
+          slaCpu={Number(draft.sla.maxCpuPct) || 80}
+          height={200}
+          caption="This is the starting point of the twin: your measured environment at the load you tested. It updates as you type."
+        />
       </div>
 
       <div className="card stack-sm">

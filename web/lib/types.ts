@@ -231,7 +231,17 @@ export type FaultWindow = {
 export type FaultResult = {
   verdict: Verdict;
   reasons: string[];
-  failure: { description: string; startS: number; endS: number; tps: number };
+  failure: {
+    description: string;
+    startS: number;
+    endS: number;
+    tps: number;
+    nodesDown: number;
+    nodes: number;
+    dbSlowdown: number;
+    extFailShare: number;
+    extSlowdown: number;
+  };
   phases: { before: Phase; during: Phase; after: Phase; healthyDuring: Phase };
   recoverySeconds: number | null;
   timeline: FaultWindow[];

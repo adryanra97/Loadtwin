@@ -170,7 +170,7 @@ export default function ReportPage() {
         </div>
       </section>
 
-      <EvaluateResults res={s.result} sla={s.service.sla} stale={false} />
+      <EvaluateResults res={s.result} sla={s.service.sla} stale={false} nodes={s.service.targetSpec.nodes} />
 
       <p className="hint">
         Every number comes from a SimPy discrete-event simulation calibrated on the measured load test. Results are estimates;

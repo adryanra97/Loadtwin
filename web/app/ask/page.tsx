@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { EvaluateResults } from "@/components/evaluate-results";
 import { RunBar, useRun } from "@/components/run";
+import { PendingStage, TwinStage } from "@/components/twin-stage";
+import { breachBands, faultFrames, patternFrames } from "@/lib/replay";
 import { ServiceStrip, useService } from "@/components/shell";
 import { Notice, VerdictBadge } from "@/components/ui";
 import { health } from "@/lib/api";
@@ -199,16 +201,8 @@ export default function AskPage() {
         <section id="results" style={{ scrollMarginTop: 120 }} aria-label="Answer" aria-busy={r.running} className="stack">
           {r.result ? (
             <Answer a={r.result} q={r.running ? asked : last?.q || asked} stale={r.running} sla={svc.sla} onOpen={open} />
-          ) : r.running ? (
-            <div className="stack">
-              <div className="skeleton" style={{ height: 160 }} />
-              <div className="skeleton" style={{ height: 260 }} />
-            </div>
           ) : (
-            <div className="card stack-sm empty">
-              <h2>Ask something</h2>
-              <p className="muted">The answer shows what was simulated, the explanation, and the numbers behind it.</p>
-            </div>
+            <PendingStage nodes={svc.targetSpec.nodes} running={r.running} idleText={<>The answer shows what was simulated, the explanation, and the numbers behind it.</>} />
           )}
         </section>
       </div>
@@ -276,10 +270,53 @@ function Answer({
         </div>
       </div>
       {a.tool === "evaluate" ? (
-        <EvaluateResults res={a.result as EvaluateResult} sla={sla} stale={false} />
+        <EvaluateResults res={a.result as EvaluateResult} sla={sla} stale={false} nodes={a.targetSpec.nodes} />
       ) : (
-        <Facts a={a} />
+        <>
+          <AskStage a={a} sla={sla} />
+          <Facts a={a} />
+        </>
       )}
+    </div>
+  );
+}
+
+function AskStage({ a, sla }: { a: AssistantResult; sla: Service["sla"] }) {
+  const common = { slaP95: sla.maxP95Ms, slaCpu: sla.maxCpuPct };
+  if (a.tool === "fault") {
+    const r = a.result as FaultResult;
+    const frames = faultFrames(r);
+    return (
+      <div className="card">
+        <TwinStage
+          title="Replay of the failure"
+          nodes={r.failure.nodes}
+          frames={frames}
+          speedHint={6}
+          bands={[{ x0: r.failure.startS, x1: r.failure.endS, kind: "fault" }, ...breachBands(frames, 10)]}
+          {...common}
+        />
+      </div>
+    );
+  }
+  if (a.tool === "pattern") {
+    const frames = patternFrames(a.result as PatternResult);
+    return (
+      <div className="card">
+        <TwinStage title="Replay of the pattern" nodes={a.targetSpec.nodes} frames={frames} bands={breachBands(frames, 10)} {...common} />
+      </div>
+    );
+  }
+  const r = a.result as SensitivityResult;
+  return (
+    <div className="card">
+      <TwinStage
+        title={`Current setup at ${num(r.peakTps)} req/s`}
+        nodes={a.targetSpec.nodes}
+        frames={[{ t: 0, tps: r.peakTps, cpu: r.baseline.cpuPct, p95: r.baseline.p95Ms, err: r.baseline.errorRatePct }]}
+        maxTps={r.peakTps}
+        {...common}
+      />
     </div>
   );
 }

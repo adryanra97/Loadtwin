@@ -4,12 +4,26 @@ import { useMemo } from "react";
 import { BarList, LineChart, RunSpread } from "@/components/charts";
 import { Stat, VerdictBadge, VerdictBanner } from "@/components/ui";
 import { num, pct, resourceName } from "@/lib/format";
-import type { EvaluateResult } from "@/lib/types";
+import { evaluateFrames, breachBands } from "@/lib/replay";
+import type { EvaluateResult, Service } from "@/lib/types";
+import { TwinStage } from "./twin-stage";
 
 const SCENARIO_NAME: Record<string, string> = { normal: "Normal", peak: "Peak" };
 
 /** Everything an evaluation returns: verdict, numbers, Monte Carlo spread, scenarios and charts. */
-export function EvaluateResults({ res, sla, stale }: { res: EvaluateResult; sla: { maxP95Ms: number; maxCpuPct: number }; stale: boolean }) {
+export function EvaluateResults({
+  res,
+  sla,
+  stale,
+  nodes,
+}: {
+  res: EvaluateResult;
+  sla: Service["sla"];
+  stale: boolean;
+  /** Target node count; shows the animated replay of the peak run when given. */
+  nodes?: number;
+}) {
+  const frames = useMemo(() => evaluateFrames(res, sla), [res, sla]);
   const peak = res.scenarios.find((s) => s.kind === "peak");
   const ts = peak?.timeseries?.filter((b) => b.t >= 0) ?? [];
   const mc = res.monteCarlo;
@@ -40,6 +54,21 @@ export function EvaluateResults({ res, sla, stale }: { res: EvaluateResult; sla:
           </div>
         )}
       </VerdictBanner>
+
+      {nodes !== undefined && frames.length > 0 && (
+        <div className="card">
+          <TwinStage
+            title="Replay of the peak run"
+            nodes={nodes}
+            frames={frames}
+            hasExt={res.calibration.externalWaitMs > 0.5}
+            slaP95={sla.maxP95Ms}
+            slaCpu={sla.maxCpuPct}
+            bands={breachBands(frames, 2)}
+            caption="Each dot is a request. Node fill is CPU, ticks in front of a node are waiting requests, red dots fail. Every value comes from the simulation, second by second."
+          />
+        </div>
+      )}
 
       <div className="stats">
         <Stat

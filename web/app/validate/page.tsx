@@ -5,6 +5,8 @@ import { useState } from "react";
 import { LineChart } from "@/components/charts";
 import { Trash, Upload } from "@/components/icons";
 import { RunBar, useRun } from "@/components/run";
+import { PendingStage, TwinStage } from "@/components/twin-stage";
+import { validateFrames } from "@/lib/replay";
 import { ServiceStrip, useService } from "@/components/shell";
 import { Notice, Stat } from "@/components/ui";
 import { ApiError, post } from "@/lib/api";
@@ -297,6 +299,7 @@ export default function ValidatePage() {
         <section id="results" style={{ scrollMarginTop: 120 }} aria-label="Results" aria-busy={r.running} className="stack">
           {r.result ? (
             <Results
+              nodes={svc.measuredSpec.nodes}
               res={r.result}
               stale={r.running}
               applied={applied}
@@ -316,13 +319,8 @@ export default function ValidatePage() {
                 setApplied(`Service measurement set to ${num(p.tps, 1)} req/s, p95 ${num(p.p95Ms)} ms, CPU ${num(p.cpuPct ?? 0)}%.`);
               }}
             />
-          ) : r.running ? (
-            <div className="skeleton" style={{ height: 360 }} />
           ) : (
-            <div className="card stack-sm" style={{ textAlign: "center", padding: 40 }}>
-              <h2>No result yet</h2>
-              <p className="muted">Import a load test (or try a sample), enter the CPU for one level, then validate.</p>
-            </div>
+            <PendingStage nodes={svc.measuredSpec.nodes} running={r.running} idleText={<>Import a load test (or try a sample), enter the CPU for one level, then validate.</>} />
           )}
         </section>
       </div>
@@ -335,7 +333,19 @@ function sortedMiddle(rows: Row[]) {
   return order[Math.floor(order.length / 2)]?.[1] ?? 0;
 }
 
-function Results({ res, stale, onApply, applied }: { res: ValidateResult; stale: boolean; onApply: () => void; applied: string }) {
+function Results({
+  res,
+  stale,
+  onApply,
+  applied,
+  nodes,
+}: {
+  res: ValidateResult;
+  stale: boolean;
+  onApply: () => void;
+  applied: string;
+  nodes: number;
+}) {
   const g = GRADE[res.grade];
   const pts = [...res.points].sort((a, b) => a.tps - b.tps);
   return (
@@ -354,6 +364,15 @@ function Results({ res, stale, onApply, applied }: { res: ValidateResult; stale:
           </ul>
         </div>
       </section>
+      <div className="card">
+        <TwinStage
+          title="Replay of each load level"
+          nodes={nodes}
+          frames={validateFrames(res)}
+          speedHint={2.5}
+          caption="The twin steps through every load level of your test. The readout is the model's prediction; the badge shows what the load test measured."
+        />
+      </div>
       <div className="stats">
         <Stat k="Average p95 error" v={res.meanAbsErrorPct === null ? "—" : pct(res.meanAbsErrorPct, 1)} s="On levels not used for calibration" />
         <Stat

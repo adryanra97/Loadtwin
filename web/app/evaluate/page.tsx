@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { EvaluateResults } from "@/components/evaluate-results";
 import { SaveScenario, type EvaluateInput } from "@/components/save-scenario";
+import { PendingStage } from "@/components/twin-stage";
 import { useRun, RunBar } from "@/components/run";
 import { ServiceStrip, useService } from "@/components/shell";
 import { NumberField, Notice, Stat, VerdictBadge, VerdictBanner } from "@/components/ui";
@@ -165,11 +166,16 @@ export default function EvaluatePage() {
         <section id="results" style={{ scrollMarginTop: 120 }} aria-label="Results" aria-busy={r.running} className="stack">
           {r.result ? (
             <>
-              <EvaluateResults res={r.result} sla={(lastInput ?? { service: svc }).service.sla} stale={r.running} />
+              <EvaluateResults
+                res={r.result}
+                sla={(lastInput ?? { service: svc }).service.sla}
+                stale={r.running}
+                nodes={(lastInput ?? { service: svc }).service.targetSpec.nodes}
+              />
               {lastInput && !r.running && <SaveScenario key={`${r.result.durationS}-${r.result.verdict}`} input={lastInput} result={r.result} />}
             </>
           ) : (
-            <Empty running={r.running} />
+            <Empty running={r.running} nodes={svc.targetSpec.nodes} />
           )}
         </section>
       </div>
@@ -177,18 +183,7 @@ export default function EvaluatePage() {
   );
 }
 
-function Empty({ running }: { running: boolean }) {
-  return running ? (
-    <div className="stack">
-      <div className="skeleton" style={{ height: 110 }} />
-      <div className="skeleton" style={{ height: 90 }} />
-      <div className="skeleton" style={{ height: 260 }} />
-    </div>
-  ) : (
-    <div className="card stack-sm" style={{ textAlign: "center", padding: 40 }}>
-      <h2>No result yet</h2>
-      <p className="muted">Check the load and press Evaluate. The example service works as is.</p>
-    </div>
-  );
+function Empty({ running, nodes }: { running: boolean; nodes: number }) {
+  return <PendingStage nodes={nodes} running={running} idleText="Check the load and press Evaluate. The example service works as is." />;
 }
 
