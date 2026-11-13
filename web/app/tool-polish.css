@@ -1,0 +1,74 @@
+/* Shared product polish across existing simulation tools — keeps all calculations and controls intact. */
+main:not(:has(.lt-home)):not(:has(.lt-service)){max-width:1280px;padding:37px 22px 76px}
+main:not(:has(.lt-home)):not(:has(.lt-service))>.page-head,
+main:not(:has(.lt-home)):not(:has(.lt-service))>div>.page-head{margin-bottom:26px;gap:9px}
+.page-head h1{font:750 clamp(32px,3vw,43px)/1.13 var(--display);letter-spacing:-.045em;color:var(--ink)}
+.page-head .lede{font-size:14px;line-height:1.7;max-width:780px;color:var(--ink-2)}
+.tool{gap:25px;grid-template-columns:minmax(320px,375px) minmax(0,1fr)}
+.tool.tool-even{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tool>aside{top:102px}
+.card{border-radius:15px;padding:22px;border-color:var(--line);box-shadow:0 8px 28px #16386407}
+.card h2,.card h3{letter-spacing:-.025em}
+.card-head{margin-bottom:17px}
+.card:has(>fieldset){padding:23px}
+fieldset>legend{font-weight:800;color:var(--ink);letter-spacing:-.012em}
+.field{gap:6px}
+.field label,.label{font-size:12px;font-weight:750}
+.input-wrap{border-radius:10px}
+.input-wrap input,.input-wrap select{min-height:43px}
+input[type=text].plain,textarea.plain{border-radius:10px;min-height:43px}
+.btn{border-radius:10px;min-height:41px;font-size:13px}
+.btn-sm{min-height:35px}
+.btn-primary{font-weight:750}
+.btn:disabled{opacity:.52}
+.hint{line-height:1.55;font-size:11px}
+.error{font-size:12px}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:800}
+.stat .v{letter-spacing:-.045em}
+.stats{gap:13px}
+.stat{border-color:var(--line)}
+.tool-card{border:1px solid var(--line);border-radius:14px}
+.tool-card:hover{border-color:var(--accent)}
+.table-wrap{border-radius:12px}
+thead th{padding:11px 14px;font-weight:750;letter-spacing:.01em}
+tbody td{padding:10px 14px}
+tbody tr:hover td{background:color-mix(in srgb,var(--surface-2) 55%,transparent)}
+.chart .axis text{fill:var(--muted)}
+.more>summary{font-size:12px;font-weight:700}
+.notice{border-radius:12px}
+.verdict{border-radius:15px}
+footer{line-height:1.7;padding-top:27px}
+@media(max-width:960px){
+ .tool,.tool.tool-even{grid-template-columns:1fr;gap:20px}
+ .tool>aside{position:static}
+}
+@media(max-width:600px){
+ main:not(:has(.lt-home)):not(:has(.lt-service)){padding:22px 14px 50px}
+ .card{padding:17px}
+ .card:has(>fieldset){padding:18px}
+ .page-head h1{font-size:33px}
+ .page-head .lede{font-size:13px}
+ .grid-cards{grid-template-columns:1fr}
+ .tool{gap:15px}
+}
+
+
+/* On-demand simulator: entering the homepage does not silently start a heavy API run. */
+.lt-home-demo{border:1px solid var(--line);background:var(--surface);border-radius:17px;overflow:hidden;box-shadow:0 12px 38px #172b4b0e}
+.lt-home-demo-idle{display:flex;align-items:center;gap:23px;padding:33px 35px}
+.lt-home-demo-idle>div:nth-child(2){flex:1;min-width:0}
+.lt-home-demo-idle strong{display:block;font:700 20px/1.25 var(--display);letter-spacing:-.03em;color:var(--ink);margin-bottom:7px}
+.lt-home-demo-idle p{color:var(--ink-2);line-height:1.65;font-size:13px;max-width:510px}
+.lt-demo-emblem{height:67px;width:67px;flex:none;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--accent-soft);border:1px solid var(--line);border-radius:16px}
+.lt-demo-emblem span{background:var(--accent);border-radius:999px;width:7px;height:21px;opacity:.9}
+.lt-demo-emblem span:nth-child(2){height:40px}
+.lt-demo-emblem span:nth-child(3){height:30px}
+.lt-demo-start{display:inline-flex;align-items:center;justify-content:space-between;gap:19px;white-space:nowrap;font:750 13px var(--font);color:#fff;background:#193765;border:1px solid #193765;border-radius:11px;padding:14px 18px;min-height:47px;cursor:pointer}
+.lt-demo-start:hover{background:#2b55a0}
+.lt-home-demo-toolbar{padding:14px 21px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:15px}
+.lt-home-demo-toolbar>span{font:800 11px var(--font);letter-spacing:.09em;color:var(--muted)}
+.lt-home-demo-toolbar>button{border:1px solid var(--line-strong);border-radius:9px;padding:8px 11px;background:var(--surface-2);font:700 12px var(--font);color:var(--ink-2);cursor:pointer}
+.lt-home-demo-toolbar>button:hover{color:var(--accent);border-color:var(--accent)}
+.lt-home-demo-active .hero-panel{border:0;border-radius:0;box-shadow:none}
+@media(max-width:800px){.lt-home-demo-idle{flex-wrap:wrap;padding:26px}.lt-demo-start{margin-left:90px}}
+@media(max-width:540px){.lt-home-demo-idle{gap:16px;padding:23px}.lt-demo-emblem{height:51px;width:51px;border-radius:12px}.lt-home-demo-idle>div:nth-child(2){flex-basis:calc(100% - 80px)}.lt-home-demo-idle strong{font-size:17px}.lt-demo-start{margin-left:0;width:100%}.lt-home-demo-toolbar{padding:12px}.lt-home-demo-toolbar>span{font-size:9px}}

@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Header } from "@/components/shell";
 import "./globals.css";
+import "./product.css";
+import "./tool-polish.css";
 
 const display = localFont({
   src: "./fonts/bricolage-grotesque.woff2",
@@ -21,7 +23,7 @@ const ui = localFont({
 export const metadata: Metadata = {
   title: { default: "LoadTwin", template: "%s · LoadTwin" },
   description:
-    "Capacity planning with a SimPy digital twin: verdicts, breach probability, cost-aware auto-sizing, load patterns and model validation.",
+    "LoadTwin is a simulation-led capacity planning tool. Test peak traffic, compare server configurations, explore bottlenecks and understand SLA risk before deployment.",
   icons: { icon: "/icon.svg" },
 };
 

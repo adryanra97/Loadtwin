@@ -10,16 +10,19 @@ import { KEYS, usePersistent } from "@/lib/store";
 import type { Service } from "@/lib/types";
 import { Logo } from "./icons";
 
-const NAV = [
-  { href: "/service/", label: "Service" },
+const PRIMARY_NAV = [
+  { href: "/", label: "Overview" },
+  { href: "/service/", label: "Service setup" },
   { href: "/evaluate/", label: "Evaluate" },
-  { href: "/autosize/", label: "Auto-size" },
-  { href: "/patterns/", label: "Patterns" },
-  { href: "/failures/", label: "Failures" },
-  { href: "/sensitivity/", label: "Sensitivity" },
-  { href: "/validate/", label: "Validate" },
   { href: "/workspace/", label: "Workspace" },
-  { href: "/ask/", label: "Ask" },
+];
+const MORE_NAV = [
+  { href: "/autosize/", label: "Auto-size" },
+  { href: "/patterns/", label: "Load patterns" },
+  { href: "/failures/", label: "Failure testing" },
+  { href: "/sensitivity/", label: "Sensitivity" },
+  { href: "/validate/", label: "Validate model" },
+  { href: "/ask/", label: "Ask LoadTwin" },
 ];
 
 type Engine = { state: "checking" } | { state: "up"; version: string; auth: boolean } | { state: "down" };
@@ -29,6 +32,7 @@ export function Header() {
   const [engine, setEngine] = useState<Engine>({ state: "checking" });
   const [keyOpen, setKeyOpen] = useState(false);
   const [key, setKey] = useState("");
+  const active = (href: string) => path === href || path + "/" === href || (href === "/workspace/" && /^\/(report|compare)/.test(path));
 
   useEffect(() => {
     let alive = true;
@@ -36,84 +40,49 @@ export function Header() {
       .then((h) => alive && setEngine({ state: "up", version: h.version, auth: h.auth }))
       .catch(() => alive && setEngine({ state: "down" }));
     setKey(getApiKey());
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, []);
 
   return (
-    <header className="topbar">
-      <div className="topbar-inner">
-        <Link href="/" className="brand" aria-label="LoadTwin home">
-          <Logo /> LoadTwin
-        </Link>
-        <div className="nav-wrap">
-        <nav className="nav" aria-label="Main">
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.href} aria-current={
-                path === n.href || path + "/" === n.href || (n.href === "/workspace/" && /^\/(report|compare)/.test(path))
-                  ? "page"
-                  : undefined
-              }>
-              {n.label}
-            </Link>
-          ))}
+    <header className="lt-header">
+      <div className="lt-header-main">
+        <Link href="/" className="lt-brand" aria-label="LoadTwin home"><Logo size={31} /><span>LoadTwin</span></Link>
+
+        <nav className="lt-primary-nav" aria-label="Primary navigation">
+          {PRIMARY_NAV.map((item) => <Link key={item.href} href={item.href} aria-current={active(item.href) ? "page" : undefined}>{item.label}</Link>)}
+          <details className="lt-nav-more">
+            <summary aria-label="More simulation tools" aria-current={MORE_NAV.some(item=>active(item.href)) ? "page" : undefined}>More tools <span aria-hidden="true">⌄</span></summary>
+            <div className="lt-nav-dropdown">
+              <strong>Explore tools</strong>
+              {MORE_NAV.map((item) => <Link key={item.href} href={item.href} aria-current={active(item.href) ? "page" : undefined}>{item.label} <span aria-hidden="true">↗</span></Link>)}
+              <a href={API_BASE + "/api/docs"} target="_blank" rel="noopener noreferrer">API documentation <span aria-hidden="true">↗</span></a>
+            </div>
+          </details>
         </nav>
-        </div>
-        <div className="topbar-tools">
-          <span className="small muted row" style={{ gap: 6 }} role="status">
-            <span
-              className="dot"
-              style={{
-                background: engine.state === "up" ? "var(--good)" : engine.state === "down" ? "var(--bad)" : "var(--line-strong)",
-              }}
-            />
-            <span className="hide-sm">
-              {engine.state === "up" ? `Engine v${engine.version}` : engine.state === "down" ? "Engine offline" : "Connecting…"}
-            </span>
-            <span className="sr-only">{engine.state === "down" ? "Simulation engine unreachable" : ""}</span>
+
+        <div className="lt-header-right">
+          <span className="lt-engine-status" role="status" aria-live="polite">
+            <i className={engine.state === "up" ? "is-up" : engine.state === "down" ? "is-down" : ""} aria-hidden="true"/>
+            <span>{engine.state === "up" ? "Engine online" : engine.state === "down" ? "Engine offline" : "Connecting…"}</span>
           </span>
-          {engine.state === "up" && engine.auth && (
-            <button type="button" className="btn btn-sm" aria-expanded={keyOpen} onClick={() => setKeyOpen((o) => !o)}>
-              API key{key ? " ✓" : ""}
-            </button>
-          )}
-          <a className="btn btn-sm btn-ghost hide-sm" href={`${API_BASE}/api/docs`} target="_blank" rel="noreferrer">
-            API docs
-          </a>
+          {engine.state === "up" && engine.auth && <button type="button" className="lt-key-button" aria-expanded={keyOpen} aria-controls="lt-api-key-panel" onClick={() => setKeyOpen((v) => !v)}>API key{key ? " ✓" : ""}</button>}
+          <Link href="/evaluate/" className="lt-header-cta">Run evaluation <span aria-hidden="true">↗</span></Link>
+          <details className="lt-mobile-nav">
+            <summary>Menu <span aria-hidden="true">☰</span></summary>
+            <nav aria-label="Mobile navigation">
+              {[...PRIMARY_NAV,...MORE_NAV].map((item) => <Link key={item.href} href={item.href} aria-current={active(item.href) ? "page" : undefined}>{item.label}</Link>)}
+              <a href={API_BASE + "/api/docs"} target="_blank" rel="noopener noreferrer">API documentation ↗</a>
+            </nav>
+          </details>
         </div>
       </div>
-      {keyOpen && (
-        <form
-          className="topbar-inner"
-          style={{ paddingBottom: 12 }}
-          onSubmit={(e) => {
-            e.preventDefault();
-            setApiKey(key.trim());
-            setKeyOpen(false);
-          }}
-        >
-          <label htmlFor="apikey" className="label">
-            API key
-          </label>
-          <input
-            id="apikey"
-            className="plain"
-            type="password"
-            autoComplete="off"
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            style={{ maxWidth: 320 }}
-          />
-          <button className="btn btn-sm btn-primary">Save</button>
-          <span className="hint">Kept only for this browser tab.</span>
-        </form>
-      )}
-      {engine.state === "down" && (
-        <div className="topbar-inner small" style={{ minHeight: 0, paddingBottom: 10, color: "var(--bad-ink)" }} role="alert">
-          The simulation engine is not reachable, so runs will fail. Your saved service and results are still here.
-        </div>
-      )}
+      {keyOpen && <form id="lt-api-key-panel" className="lt-key-form" onSubmit={(e) => { e.preventDefault(); setApiKey(key.trim()); setKeyOpen(false); }}>
+        <label className="label" htmlFor="apikey">API key</label>
+        <input id="apikey" className="plain" type="password" autoComplete="off" value={key} onChange={(e)=>setKey(e.target.value)} />
+        <button type="submit" className="btn btn-primary btn-sm">Save key</button>
+        <span className="hint">Saved for this browser tab only.</span>
+      </form>}
+      {engine.state === "down" && <p className="lt-engine-alert" role="alert">The simulation engine is unreachable. You can still review your saved service and scenarios. Try running again when the connection returns.</p>}
     </header>
   );
 }
