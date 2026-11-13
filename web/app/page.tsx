@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TwinHero } from "@/components/twin-hero";
+import { HomeDemo } from "@/components/home-demo";
 
 const PRIMARY = [
   { number:"01", type:"CAPACITY ASSESSMENT", title:"Will this setup pass?", description:"Compare normal, peak and stress traffic against your response-time, error and resource limits. Find the first constraint.", href:"/evaluate/", cta:"Evaluate capacity", output:"SLA verdict & headroom" },
@@ -45,7 +45,7 @@ export default function Home(){
           <div className="lt-hero-eyebrow"><span className="lt-eyebrow-dot"/> SIMULATION-LED CAPACITY PLANNING</div>
           <h1 id="lt-hero-title">Know your limits. <span>Before traffic finds them.</span></h1>
           <p>Turn load-test measurements into a digital twin of your service. See what happens when traffic grows, machines change or something fails — before committing to infrastructure.</p>
-          <div className="lt-hero-actions"><Link className="lt-action lt-action-light" href="/evaluate/">Try an example <span aria-hidden="true">↗</span></Link><Link className="lt-action lt-action-outline" href="/service/">Set up my service <span aria-hidden="true">→</span></Link></div>
+          <div className="lt-hero-actions"><Link className="lt-action lt-action-light" href="/evaluate/">Open evaluation <span aria-hidden="true">↗</span></Link><Link className="lt-action lt-action-outline" href="/service/">Set up my service <span aria-hidden="true">→</span></Link></div>
           <div className="lt-hero-proof"><span>✓ Calibrated from load tests</span><span>✓ SimPy-based simulation</span><span>✓ No sign-in required</span></div>
         </div>
         <ExamplePanel/>
@@ -65,8 +65,8 @@ export default function Home(){
     </div></section>
 
     <section className="lt-section lt-play" aria-labelledby="lt-play-title">
-      <div className="lt-play-head"><div><span className="lt-overline">INTERACTIVE PLAYGROUND</span><h2 id="lt-play-title">Change the load. <span>See what changes.</span></h2><p>Explore a service in the live simulator below. The controls call the simulation engine, so the results are model estimates — not just a decorative animation.</p></div><Link href="/service/" className="lt-inline-action">Edit inputs <span aria-hidden="true">↗</span></Link></div>
-      <TwinHero/>
+      <div className="lt-play-head"><div><span className="lt-overline">INTERACTIVE PLAYGROUND</span><h2 id="lt-play-title">Change the load. <span>See what changes.</span></h2><p>Launch the interactive simulator when you are ready. It uses your saved service and the real simulation engine, rather than running calculations before you ask.</p></div><Link href="/service/" className="lt-inline-action">Edit inputs <span aria-hidden="true">↗</span></Link></div>
+      <HomeDemo/>
     </section>
 
     <section className="lt-bottom"><div className="lt-section lt-bottom-wrap"><div><span className="lt-overline">READY WHEN YOU ARE</span><h2>A clearer picture of your next deployment.</h2><p>Service settings are saved in your browser. Simulation requests go to the engine. Always confirm high-impact decisions with a real load test.</p></div><div className="lt-bottom-actions"><Link href="/service/" className="lt-action lt-action-light">Set up a service <span aria-hidden="true">→</span></Link><Link href="/workspace/" className="lt-action lt-action-outline">Open workspace <span aria-hidden="true">↗</span></Link></div></div></section>
