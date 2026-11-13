@@ -80,6 +80,27 @@ app = FastAPI(
         "Source: https://github.com/adryanra97/loadtwin"
     ),
 )
+
+
+class StripTrailingSlash:
+    """Treat ``/api/health/`` like ``/api/health``.
+
+    Hosts that add a trailing slash (and FastAPI redirecting it away) would otherwise bounce a
+    request between the two forms forever.
+    """
+
+    def __init__(self, app) -> None:
+        self.app = app
+
+    async def __call__(self, scope, receive, send) -> None:
+        """Rewrite the path of API requests, then pass them on."""
+        path = scope.get("path", "")
+        if scope["type"] == "http" and path.startswith("/api/") and len(path) > 5 and path.endswith("/"):
+            scope = dict(scope, path=path.rstrip("/"), raw_path=path.rstrip("/").encode())
+        await self.app(scope, receive, send)
+
+
+app.add_middleware(StripTrailingSlash)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in os.environ.get("LOADTWIN_CORS_ORIGINS", "*").split(",") if o.strip()],

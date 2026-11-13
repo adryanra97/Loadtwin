@@ -13,6 +13,12 @@ def ex(name):
     return client.get("/api/v1/examples").json()[name]
 
 
+def test_trailing_slash_does_not_redirect():
+    r = client.get("/api/health/", follow_redirects=False)
+    assert r.status_code == 200 and r.json()["status"] == "ok"
+    assert client.post("/api/v1/examples/", follow_redirects=False).status_code in (405, 200)
+
+
 def test_meta():
     h = client.get("/api/health").json()
     assert h["status"] == "ok" and h["auth"] is False
