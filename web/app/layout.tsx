@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { Header } from "@/components/shell";
 import "./globals.css";
 import "./product.css";
+import "./tool-polish.css";
 
 const display = localFont({
   src: "./fonts/bricolage-grotesque.woff2",
