@@ -93,44 +93,35 @@ export function ServiceStrip({ show = ["measured", "target", "sla"] }: { show?: 
   const m = svc.measuredSpec;
   const t = svc.targetSpec;
   return (
-    <div className="card" style={{ padding: "12px 16px" }}>
-      <div className="spread">
-        <div className="stack-sm" style={{ gap: 2 }}>
-          <span className="section-title">Service</span>
+    <section className="xp-service-context" aria-label="Current simulation service">
+      <div className="xp-service-context-header">
+        <div>
+          <span className="xp-service-context-label">CURRENT SERVICE</span>
           <strong>{svc.name}</strong>
         </div>
-        <Link className="btn btn-sm" href="/service/">
-          Edit service
-        </Link>
+        <Link href="/service/" className="xp-service-edit">Edit setup <span aria-hidden="true">↗</span></Link>
       </div>
-      <dl className="kv small" style={{ marginTop: 8 }}>
+      <dl className="xp-service-context-details">
         {show.includes("measured") && (
           <>
-            <dt>Measured</dt>
-            <dd>
-              {m.nodes} × {m.vcpu} vCPU at {num(svc.measurement.tps)} req/s: CPU {num(svc.measurement.cpuPct)}%, p95{" "}
-              {num(svc.measurement.p95Ms)} ms
-            </dd>
+            <dt>Measured baseline</dt>
+            <dd>{m.nodes} × {m.vcpu} vCPU at {num(svc.measurement.tps)} req/s · CPU {num(svc.measurement.cpuPct)}% · p95 {num(svc.measurement.p95Ms)} ms</dd>
           </>
         )}
         {show.includes("target") && (
           <>
-            <dt>Target</dt>
-            <dd>
-              {t.nodes} × {t.vcpu} vCPU, {num(t.ramGb)} GB, {t.threadPool} threads
-            </dd>
+            <dt>Target setup</dt>
+            <dd>{t.nodes} × {t.vcpu} vCPU · {num(t.ramGb)} GB RAM · {t.threadPool} threads</dd>
           </>
         )}
         {show.includes("sla") && (
           <>
-            <dt>SLA</dt>
-            <dd>
-              p95 ≤ {num(svc.sla.maxP95Ms)} ms, errors ≤ {num(svc.sla.maxErrorRatePct, 1)}%, CPU ≤ {num(svc.sla.maxCpuPct)}%
-            </dd>
+            <dt>SLA thresholds</dt>
+            <dd>p95 ≤ {num(svc.sla.maxP95Ms)} ms · errors ≤ {num(svc.sla.maxErrorRatePct, 1)}% · CPU ≤ {num(svc.sla.maxCpuPct)}%</dd>
           </>
         )}
       </dl>
-    </div>
+    </section>
   );
 }
 
