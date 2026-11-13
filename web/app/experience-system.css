@@ -175,7 +175,10 @@ body:has(.lt-service) .lt-service-assurance{padding-top:10px;margin-top:14px}
 .xp-service-context-details dd{font-size:12px;line-height:1.58;color:#2a475a;margin:3px 0 0;font-variant-numeric:tabular-nums}
 
 /* Workspaces share one two-column split, panel system, results and inputs. */
-.tool,.tool.tool-even{display:grid;grid-template-columns:minmax(290px,355px) minmax(0,1fr);gap:32px;align-items:start}
+.tool{display:grid;grid-template-columns:minmax(290px,355px) minmax(0,1fr);gap:32px;align-items:start}
+/* Data-import tools such as Validate need two genuinely wide columns; don't
+   squeeze editable data tables into the narrow control rail. */
+.tool.tool-even{grid-template-columns:repeat(2,minmax(0,1fr))}
 .tool>aside{top:106px}
 .tool>aside.stack{gap:16px}
 .tool>section.stack{gap:18px;min-width:0}
