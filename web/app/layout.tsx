@@ -5,6 +5,7 @@ import "./globals.css";
 import "./product.css";
 import "./tool-polish.css";
 import "./editorial.css";
+import "./experience-system.css";
 
 const display = localFont({
   src: "./fonts/bricolage-grotesque.woff2",
@@ -29,10 +30,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f6f8" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f131c" },
-  ],
+  themeColor: "#061927",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
