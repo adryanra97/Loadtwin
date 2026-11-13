@@ -51,3 +51,24 @@ footer{line-height:1.7;padding-top:27px}
  .grid-cards{grid-template-columns:1fr}
  .tool{gap:15px}
 }
+
+
+/* On-demand simulator: entering the homepage does not silently start a heavy API run. */
+.lt-home-demo{border:1px solid var(--line);background:var(--surface);border-radius:17px;overflow:hidden;box-shadow:0 12px 38px #172b4b0e}
+.lt-home-demo-idle{display:flex;align-items:center;gap:23px;padding:33px 35px}
+.lt-home-demo-idle>div:nth-child(2){flex:1;min-width:0}
+.lt-home-demo-idle strong{display:block;font:700 20px/1.25 var(--display);letter-spacing:-.03em;color:var(--ink);margin-bottom:7px}
+.lt-home-demo-idle p{color:var(--ink-2);line-height:1.65;font-size:13px;max-width:510px}
+.lt-demo-emblem{height:67px;width:67px;flex:none;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--accent-soft);border:1px solid var(--line);border-radius:16px}
+.lt-demo-emblem span{background:var(--accent);border-radius:999px;width:7px;height:21px;opacity:.9}
+.lt-demo-emblem span:nth-child(2){height:40px}
+.lt-demo-emblem span:nth-child(3){height:30px}
+.lt-demo-start{display:inline-flex;align-items:center;justify-content:space-between;gap:19px;white-space:nowrap;font:750 13px var(--font);color:#fff;background:#193765;border:1px solid #193765;border-radius:11px;padding:14px 18px;min-height:47px;cursor:pointer}
+.lt-demo-start:hover{background:#2b55a0}
+.lt-home-demo-toolbar{padding:14px 21px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:15px}
+.lt-home-demo-toolbar>span{font:800 11px var(--font);letter-spacing:.09em;color:var(--muted)}
+.lt-home-demo-toolbar>button{border:1px solid var(--line-strong);border-radius:9px;padding:8px 11px;background:var(--surface-2);font:700 12px var(--font);color:var(--ink-2);cursor:pointer}
+.lt-home-demo-toolbar>button:hover{color:var(--accent);border-color:var(--accent)}
+.lt-home-demo-active .hero-panel{border:0;border-radius:0;box-shadow:none}
+@media(max-width:800px){.lt-home-demo-idle{flex-wrap:wrap;padding:26px}.lt-demo-start{margin-left:90px}}
+@media(max-width:540px){.lt-home-demo-idle{gap:16px;padding:23px}.lt-demo-emblem{height:51px;width:51px;border-radius:12px}.lt-home-demo-idle>div:nth-child(2){flex-basis:calc(100% - 80px)}.lt-home-demo-idle strong{font-size:17px}.lt-demo-start{margin-left:0;width:100%}.lt-home-demo-toolbar{padding:12px}.lt-home-demo-toolbar>span{font-size:9px}}
