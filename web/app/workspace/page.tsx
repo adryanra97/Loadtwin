@@ -1,4 +1,5 @@
 "use client";
+import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -51,13 +52,7 @@ export default function WorkspacePage() {
 
   return (
     <div className="stack">
-      <div className="page-head">
-        <h1>Workspace</h1>
-        <p className="lede">
-          Scenarios you saved from Evaluate, grouped by service. Pick two to compare them side by side, open one as a report to
-          print or share, or load it back to keep working.
-        </p>
-      </div>
+      <ToolPageIntro category="SAVED SCENARIOS" title="Workspace" description="Scenarios you saved from Evaluate, grouped by service. Pick two to compare them side by side, open one as a report to print or share, or load it back to keep working." />
 
       <div className="spread">
         <span className="small muted" role="status" aria-live="polite">
