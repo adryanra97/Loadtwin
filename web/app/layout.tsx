@@ -4,6 +4,7 @@ import { Header } from "@/components/shell";
 import "./globals.css";
 import "./product.css";
 import "./tool-polish.css";
+import "./editorial.css";
 
 const display = localFont({
   src: "./fonts/bricolage-grotesque.woff2",
@@ -21,7 +22,7 @@ const ui = localFont({
 });
 
 export const metadata: Metadata = {
-  title: { default: "LoadTwin", template: "%s · LoadTwin" },
+  title: { default: "LoadTwin — Capacity Intelligence", template: "%s · LoadTwin" },
   description:
     "LoadTwin is a simulation-led capacity planning tool. Test peak traffic, compare server configurations, explore bottlenecks and understand SLA risk before deployment.",
   icons: { icon: "/icon.svg" },
