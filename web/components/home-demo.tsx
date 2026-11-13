@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TwinHero } from "./twin-hero";
 
 /** Simulations only start after the visitor explicitly opens the playground. */
 export function HomeDemo(){
   const [open,setOpen]=useState(false);
+  // "Try it live" links (#try) open the playground directly.
+  useEffect(()=>{
+    const check=()=>{ if(window.location.hash==="#try") setOpen(true); };
+    const onClick=(e:MouseEvent)=>{ if((e.target as Element|null)?.closest?.('a[href="#try"]')) setOpen(true); };
+    check();
+    window.addEventListener("hashchange",check);
+    document.addEventListener("click",onClick);
+    return ()=>{ window.removeEventListener("hashchange",check); document.removeEventListener("click",onClick); };
+  },[]);
   return <div className="lt-home-demo" id="lt-home-demo-content">
     {!open ? <div className="lt-home-demo-idle">
       <div className="lt-demo-emblem" aria-hidden="true"><span/><span/><span/></div>

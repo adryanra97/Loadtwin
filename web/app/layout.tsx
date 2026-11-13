@@ -6,6 +6,7 @@ import "./product.css";
 import "./tool-polish.css";
 import "./editorial.css";
 import "./experience-system.css";
+import "./typography.css";
 
 const display = localFont({
   src: "./fonts/bricolage-grotesque.woff2",
@@ -13,6 +14,15 @@ const display = localFont({
   weight: "200 800",
   display: "swap",
   adjustFontFallback: "Arial",
+});
+const serif = localFont({
+  src: [
+    { path: "./fonts/instrument-serif.woff2", style: "normal", weight: "400" },
+    { path: "./fonts/instrument-serif-italic.woff2", style: "italic", weight: "400" },
+  ],
+  variable: "--font-serif",
+  display: "swap",
+  adjustFontFallback: "Times New Roman",
 });
 const ui = localFont({
   src: "./fonts/instrument-sans.woff2",
@@ -35,7 +45,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${ui.variable}`}>
+    <html lang="en" className={`${display.variable} ${ui.variable} ${serif.variable}`}>
       <body>
         <a className="skip" href="#main">
           Skip to content

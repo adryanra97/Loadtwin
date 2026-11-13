@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { TwinArchitecture } from "@/components/twin-architecture";
 import { HomeDemo } from "@/components/home-demo";
+import { TOOLS, type ToolId } from "@/lib/tools";
+
+const TOOL_ORDER: ToolId[] = ["evaluate", "autosize", "patterns", "failures", "sensitivity", "validate", "ask"];
 
 const DECISIONS = [
   { number: "01", category: "CAPACITY", question: "Will this system hold?", detail: "Understand if your target configuration meets latency, error and utilization limits — and which resource becomes the constraint first.", href: "/evaluate/", action: "Evaluate capacity" },
@@ -19,13 +22,20 @@ export default function Home() {
             <p className="ed-hero-lede">LoadTwin turns real load-test measurements into a simulation of your service — so you can challenge the assumptions behind your next deployment.</p>
             <div className="ed-hero-cta">
               <Link href="/evaluate/" className="ed-primary-cta">Explore an evaluation <span aria-hidden="true">↗</span></Link>
-              <a href="#approach" className="ed-secondary-cta">Understand the approach <span aria-hidden="true">↓</span></a>
+              <a href="#try" className="ed-secondary-cta">Try it live <span aria-hidden="true">↓</span></a>
             </div>
             <p className="ed-hero-annotation">A simulation tool for understanding capacity, cost and performance risk. No account required.</p>
           </div>
           <div className="ed-hero-figure"><TwinArchitecture /></div>
         </div>
         <div className="ed-hero-bottom"><div><span>01 — UNDERSTAND</span><span>02 — EXPERIMENT</span><span>03 — DECIDE</span></div><a href="#question">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></a></div>
+      </section>
+
+      <section id="try" className="ed-play ed-section" aria-labelledby="ed-play-title">
+        <div className="ed-container">
+          <div className="ed-play-head"><div><span className="ed-label">THE INTERACTIVE MODEL</span><h2 id="ed-play-title">Curiosity, meet <em>consequence.</em></h2><p>Change the load or the machine setup. Add traffic, add nodes, crash one. Every change is re-simulated by the real engine, on the spot.</p></div><Link href="/service/" className="ed-text-link">Change service inputs <span aria-hidden="true">↗</span></Link></div>
+          <HomeDemo />
+        </div>
       </section>
 
       <section id="question" className="ed-statement ed-section" aria-labelledby="ed-question-title">
@@ -76,7 +86,35 @@ export default function Home() {
               <span className="ed-decision-action">{d.action} <b aria-hidden="true">↗</b></span>
             </Link>
           ))}</div>
-          <p className="ed-decisions-note">Also available: <Link href="/patterns/">traffic patterns</Link>, <Link href="/sensitivity/">sensitivity analysis</Link>, <Link href="/validate/">model validation</Link> and <Link href="/ask/">what-if questions</Link>.</p>
+          <div className="ed-toolkit" aria-labelledby="ed-toolkit-title">
+            <div className="ed-toolkit-head">
+              <h3 id="ed-toolkit-title">Seven methods, one model, plus a live mode</h3>
+              <p>Each tool asks the same calibrated twin a different question. Start anywhere; they share your service.</p>
+            </div>
+            <ul className="ed-toolkit-grid">
+              {TOOL_ORDER.map((id) => {
+                const t = TOOLS[id];
+                return (
+                  <li key={id}>
+                    <Link href={t.href} className="ed-tool">
+                      <span className="ed-tool-group">{t.group}</span>
+                      <strong>{t.name}</strong>
+                      <span className="ed-tool-q">{t.question}</span>
+                      <span className="ed-tool-gives">{t.gives}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+              <li>
+                <a href="#try" className="ed-tool ed-tool-live">
+                  <span className="ed-tool-group">Play</span>
+                  <strong>Live mode</strong>
+                  <span className="ed-tool-q">Add traffic, add nodes, crash one, and watch.</span>
+                  <span className="ed-tool-gives">Re-simulated on every click, on this page</span>
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -91,12 +129,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="explore" className="ed-play ed-section" aria-labelledby="ed-play-title">
-        <div className="ed-container">
-          <div className="ed-play-head"><div><span className="ed-label">THE INTERACTIVE MODEL</span><h2 id="ed-play-title">Curiosity, meet <em>consequence.</em></h2><p>Change the load or the machine setup. When you launch the playground, LoadTwin asks the real simulation engine to estimate the result.</p></div><Link href="/service/" className="ed-text-link">Change service inputs <span aria-hidden="true">↗</span></Link></div>
-          <HomeDemo />
-        </div>
-      </section>
 
       <section className="ed-close" aria-labelledby="ed-close-title">
         <div className="ed-container ed-close-inner"><div><p className="ed-label">YOUR NEXT DEPLOYMENT</p><h2 id="ed-close-title">Know more.<br /><em>Assume less.</em></h2><p>Bring your test measurements, or begin with an example. See the model at work before making a capacity decision.</p></div><Link href="/service/" className="ed-close-cta">Build your service twin <span aria-hidden="true">↗</span></Link></div>

@@ -1,4 +1,5 @@
 "use client";
+import { NextTools } from "@/components/next-tools";
 import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import { LineChart } from "@/components/charts";
@@ -154,7 +155,10 @@ export default function FailuresPage() {
         </aside>
         <section id="results" style={{ scrollMarginTop: 120 }} aria-label="Results" aria-busy={r.running} className="stack">
           {r.result ? (
-            <Results res={r.result} sla={svc.sla} stale={r.running} />
+            <>
+              <Results res={r.result} sla={svc.sla} stale={r.running} />
+              <NextTools current="failures" verdict={r.result.verdict} />
+            </>
           ) : (
             <ToolIdle nodes={svc.targetSpec.nodes} startTps={Number(st.tps) || undefined} running={r.running} idleText={<>Pick a failure and run it. “A node crashes” is a good first test of N+1 redundancy.</>} />
           )}

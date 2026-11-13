@@ -1,0 +1,428 @@
+/*
+ * Typography pass on top of the editorial system. Loaded last so it is easy to review or remove.
+ *
+ * 1. One bundled serif for the italic accents and numerals (Georgia is missing on Linux and Android,
+ *    so the accent changed shape from device to device).
+ * 2. Display tracking eased from about -0.06em to -0.04em: at heavy weights Bricolage letters touched.
+ * 3. One display scale, so no section heading is bigger than the page's h1:
+ *    hero 88 > closing 80 > section 60 > sub-section 46 > item 38 > card 30 (desktop maximums).
+ * 4. Nothing below 11px, labels at 11-12px, interface text at 14px or more.
+ * 5. Paragraph measure capped near 65 characters.
+ */
+:root {
+  --ed-serif: var(--font-serif), Georgia, "Times New Roman", serif;
+}
+.ed-home em {
+  letter-spacing: -0.01em;
+}
+.ed-decision-number {
+  font-family: var(--ed-serif);
+  font-weight: 400;
+}
+
+/* Display scale */
+.ed-hero-copy h1 {
+  font-size: clamp(52px, 5.6vw, 88px);
+  letter-spacing: -0.042em;
+  line-height: 1.02;
+  font-weight: 700;
+}
+.ed-close h2 {
+  font-size: clamp(46px, 5.2vw, 80px);
+  letter-spacing: -0.04em;
+}
+.ed-statement-content h2,
+.ed-decisions-intro h2,
+.ed-approach h2,
+.ed-play h2 {
+  font-size: clamp(38px, 3.9vw, 60px);
+  letter-spacing: -0.035em;
+  font-weight: 680;
+}
+.ed-evidence-heading h2 {
+  font-size: clamp(32px, 3vw, 46px);
+  letter-spacing: -0.03em;
+}
+.ed-decision-main h3 {
+  font-size: clamp(26px, 2.4vw, 38px);
+  letter-spacing: -0.028em;
+}
+.ed-method-list h3 {
+  font-size: 28px;
+  letter-spacing: -0.022em;
+}
+.ed-evidence-cell > strong {
+  font-size: clamp(72px, 7.6vw, 116px);
+  letter-spacing: -0.05em;
+}
+.ed-arch-primary > strong {
+  letter-spacing: -0.045em;
+}
+.ed-arch-secondary strong {
+  letter-spacing: -0.03em;
+}
+.ed-home .lt-home-demo-idle strong {
+  letter-spacing: -0.025em;
+}
+
+/* Tool pages: a workspace heading, so the form and the result reach the first screen */
+.xp-page-heading h1,
+.page-head h1,
+body:has(.lt-service) .lt-service-head-row h1 {
+  font-size: clamp(36px, 3.3vw, 50px);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+/* Minimum sizes for labels and interface text */
+.ed-hero-bottom span,
+.ed-hero-bottom > a,
+.ed-architecture-top,
+.ed-arch-status,
+.ed-arch-primary > span,
+.ed-arch-secondary span,
+.ed-decision-main > span,
+.xp-service-context-label,
+.xp-service-context-details dt,
+.lt-sample-label,
+.lt-example-note,
+.lt-cap-kicker,
+.lt-service-rail .lt-overline,
+body:has(.lt-service) .lt-service-rail .lt-overline {
+  font-size: 11px;
+}
+.ed-label,
+.ed-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+.lt-primary-nav > a,
+.lt-nav-more > summary {
+  font-size: 14px;
+}
+.lt-engine-status,
+.lt-header-cta {
+  font-size: 13px;
+}
+.ed-decision-action {
+  font-size: 14px;
+}
+.ed-decisions-note {
+  font-size: 14px;
+}
+
+/* Measure */
+.ed-decision-main p,
+.ed-hero-lede,
+.ed-statement-lower p,
+.ed-play-head p:not(.ed-label),
+.xp-page-heading > p {
+  max-width: 64ch;
+}
+
+@media (max-width: 760px) {
+  .ed-hero-bottom span,
+  .ed-architecture-top,
+  .ed-arch-primary > span,
+  .ed-arch-secondary span {
+    font-size: 11px;
+  }
+  .ed-decisions-intro h2 {
+    font-size: clamp(36px, 9vw, 48px);
+  }
+}
+
+/* ---------- Discoverability of the other methods ---------- */
+.ed-toolkit {
+  margin-top: 64px;
+  display: grid;
+  gap: 24px;
+}
+.ed-toolkit-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px 64px;
+  align-items: end;
+}
+.ed-toolkit-head h3 {
+  font: 680 clamp(28px, 2.6vw, 38px) / 1.15 var(--display);
+  letter-spacing: -0.028em;
+  color: #0b2a40;
+  margin: 0;
+}
+.ed-toolkit-head p {
+  color: #5a6c78;
+  font-size: 16px;
+  line-height: 1.7;
+  max-width: 52ch;
+}
+.ed-toolkit-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid #9aadb8;
+  border-left: 1px solid #d4dce0;
+}
+.ed-tool {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  height: 100%;
+  padding: 22px 22px 26px;
+  border-right: 1px solid #d4dce0;
+  border-bottom: 1px solid #d4dce0;
+  color: #142f42;
+  text-decoration: none;
+  transition: background 0.18s;
+}
+.ed-tool:hover {
+  background: #f2f7f9;
+}
+.ed-tool:hover strong {
+  color: #1f5f93;
+}
+.ed-tool-group {
+  font: 700 11px var(--font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #507087;
+}
+.ed-tool strong {
+  font: 680 22px / 1.2 var(--display);
+  letter-spacing: -0.02em;
+  margin-top: 4px;
+}
+.ed-tool-q {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1d3a4f;
+}
+.ed-tool-gives {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #607482;
+}
+.ed-toolkit-grid li:first-child .ed-tool {
+  background: #0b2a40;
+  color: #eef7fb;
+}
+.ed-toolkit-grid li:first-child .ed-tool-group,
+.ed-toolkit-grid li:first-child .ed-tool-gives {
+  color: #9fc3d4;
+}
+.ed-toolkit-grid li:first-child .ed-tool-q {
+  color: #e3f1f7;
+}
+.ed-toolkit-grid li:first-child .ed-tool:hover {
+  background: #123a57;
+}
+.ed-toolkit-grid li:first-child .ed-tool:hover strong {
+  color: #fff;
+}
+@media (max-width: 1100px) {
+  .ed-toolkit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .ed-toolkit-head {
+    grid-template-columns: 1fr;
+  }
+  .ed-toolkit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* More tools menu with a line about each method */
+.lt-nav-dropdown {
+  width: 320px;
+}
+.lt-tool-link {
+  display: grid !important;
+  gap: 2px;
+  padding: 9px 10px !important;
+  border-radius: 4px;
+}
+.lt-tool-link-name {
+  font-weight: 650;
+  font-size: 14px;
+  color: #143249;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.lt-tool-link-name em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6a8597;
+}
+.lt-tool-link-hint {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #557083;
+}
+
+/* After a result: what to try next */
+.next-tools {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid #c9d8df;
+  background: #f4f8fa;
+}
+.next-tools-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px 24px;
+  flex-wrap: wrap;
+}
+.next-tools-head h2 {
+  font: 680 22px / 1.2 var(--display);
+  letter-spacing: -0.02em;
+  color: #0b2a40;
+  margin: 0;
+}
+.next-tools-head p {
+  color: #5a6c78;
+  font-size: 14px;
+}
+.next-tools ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.next-tool {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  height: 100%;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #d4dce0;
+  color: #142f42;
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.next-tool:hover {
+  border-color: #1f5f93;
+  background: #fbfdfe;
+}
+.next-tool-group {
+  font: 700 11px var(--font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #507087;
+}
+.next-tool strong {
+  font: 680 18px / 1.25 var(--display);
+  letter-spacing: -0.015em;
+}
+.next-tool-why {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #3d596c;
+}
+.next-tool-go {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f5f93;
+}
+@container (max-width: 640px) {
+  .next-tools ul {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .next-tools ul {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Contrast: small text in the theme that measured under 4.5:1 */
+.ed-fine-print {
+  color: #4f6878;
+}
+.lt-home-demo-toolbar > span {
+  color: #435a6b;
+}
+.xp-service-context-label {
+  color: #3d5f74;
+}
+.ed-evidence-cell > strong small {
+  color: #4b6879;
+}
+.lt-tool-link-name em {
+  color: #4b6577;
+}
+.hint a,
+.muted a {
+  color: #1d5a8c;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Display line height: room for ascenders and descenders between lines */
+.ed-hero-copy h1,
+.ed-close h2 {
+  line-height: 1.06;
+}
+.ed-statement-content h2,
+.ed-decisions-intro h2,
+.ed-approach h2,
+.ed-play h2 {
+  line-height: 1.1;
+}
+.ed-decision-number {
+  color: #5d87a2;
+}
+.knob-label,
+.stage-readout dt,
+.live .hint {
+  color: #4a6070;
+}
+.xp-service-context-details dt {
+  color: #4f6a7a;
+}
+:root {
+  --muted: #536977;
+}
+body main:not(:has(.lt-home)):not(:has(.lt-service)) .hint {
+  font-size: 13px;
+  color: #546a78;
+}
+body main:not(:has(.lt-home)):not(:has(.lt-service)) .card .small.muted {
+  color: #526b7d;
+}
+body:has(.lt-service) .lt-service-rail .lt-overline {
+  color: #546b7d;
+}
+body:has(.lt-service) .lt-service-rail > nav > a > span {
+  color: #4d6d82;
+}
+.preset span,
+.unit {
+  color: #4f6573;
+}
+body main:not(:has(.lt-home)):not(:has(.lt-service)) .card .muted {
+  color: #526b7d;
+}
+.live .hint {
+  font-size: 13px;
+}
+.ed-tool-live {
+  background: #e3f3f8;
+}
+.ed-tool-live:hover {
+  background: #d3ecf4;
+}

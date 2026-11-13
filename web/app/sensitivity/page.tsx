@@ -1,4 +1,5 @@
 "use client";
+import { NextTools } from "@/components/next-tools";
 import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import { RunBar, useRun } from "@/components/run";
@@ -108,7 +109,10 @@ export default function SensitivityPage() {
         </aside>
         <section id="results" style={{ scrollMarginTop: 120 }} aria-label="Results" aria-busy={r.running} className="stack">
           {r.result ? (
-            <Results res={r.result} slaP95={svc.sla.maxP95Ms} stale={r.running} nodes={svc.targetSpec.nodes} />
+            <>
+              <Results res={r.result} slaP95={svc.sla.maxP95Ms} stale={r.running} nodes={svc.targetSpec.nodes} />
+              <NextTools current="sensitivity" verdict={r.result.baseline.meetsSla ? "PASS" : "FAIL"} />
+            </>
           ) : (
             <ToolIdle nodes={svc.targetSpec.nodes} startTps={Number(st.peakTps) || undefined} running={r.running} idleText={<>Set the load and press Analyse. A load close to your limit shows the clearest differences.</>} />
           )}

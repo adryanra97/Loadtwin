@@ -1,4 +1,5 @@
 "use client";
+import { NextTools } from "@/components/next-tools";
 import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import { BarList } from "@/components/charts";
@@ -223,7 +224,10 @@ export default function AutosizePage() {
         </aside>
         <section id="results" style={{ scrollMarginTop: 120 }} aria-label="Results" aria-busy={r.running} className="stack">
           {r.result ? (
-            <Results res={r.result} stale={r.running} sla={svc.sla} />
+            <>
+              <Results res={r.result} stale={r.running} sla={svc.sla} />
+              <NextTools current="autosize" verdict={r.result.recommended ? "PASS" : "FAIL"} />
+            </>
           ) : (
             <ToolIdle nodes={svc.targetSpec.nodes} startTps={Number(st.peakTps) || undefined} running={r.running} idleText={<>Set the peak load and the machine types you can buy, then search.</>} />
           )}

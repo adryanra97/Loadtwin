@@ -1,4 +1,5 @@
 "use client";
+import { NextTools } from "@/components/next-tools";
 import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import Link from "next/link";
@@ -171,6 +172,7 @@ export default function EvaluatePage() {
                 nodes={(lastInput ?? { service: svc }).service.targetSpec.nodes}
               />
               {lastInput && !r.running && <SaveScenario key={`${r.result.durationS}-${r.result.verdict}`} input={lastInput} result={r.result} />}
+              {!r.running && <NextTools current="evaluate" verdict={r.result.verdict} />}
             </>
           ) : (
             <Empty running={r.running} nodes={svc.targetSpec.nodes} peak={Number(st.peakTps) || undefined} />

@@ -1,4 +1,5 @@
 "use client";
+import { NextTools } from "@/components/next-tools";
 import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import Link from "next/link";
@@ -294,28 +295,31 @@ export default function ValidatePage() {
         </aside>
         <section id="results" style={{ scrollMarginTop: 120 }} aria-label="Results" aria-busy={r.running} className="stack">
           {r.result ? (
-            <Results
-              nodes={svc.measuredSpec.nodes}
-              measuredSpec={svc.measuredSpec}
-              res={r.result}
-              stale={r.running}
-              applied={applied}
-              onApply={() => {
-                const p = r.result!.points[r.result!.calibrationIndex];
-                saveSvc({
-                  ...svc,
-                  measurement: {
-                    ...svc.measurement,
-                    tps: p.tps,
-                    p95Ms: p.p95Ms,
-                    cpuPct: p.cpuPct ?? svc.measurement.cpuPct,
-                    memPct: p.memPct ?? svc.measurement.memPct,
-                    errorRatePct: p.errorRatePct,
-                  },
-                });
-                setApplied(`Service measurement set to ${num(p.tps, 1)} req/s, p95 ${num(p.p95Ms)} ms, CPU ${num(p.cpuPct ?? 0)}%.`);
-              }}
-            />
+            <>
+              <Results
+                nodes={svc.measuredSpec.nodes}
+                measuredSpec={svc.measuredSpec}
+                res={r.result}
+                stale={r.running}
+                applied={applied}
+                onApply={() => {
+                  const p = r.result!.points[r.result!.calibrationIndex];
+                  saveSvc({
+                    ...svc,
+                    measurement: {
+                      ...svc.measurement,
+                      tps: p.tps,
+                      p95Ms: p.p95Ms,
+                      cpuPct: p.cpuPct ?? svc.measurement.cpuPct,
+                      memPct: p.memPct ?? svc.measurement.memPct,
+                      errorRatePct: p.errorRatePct,
+                    },
+                  });
+                  setApplied(`Service measurement set to ${num(p.tps, 1)} req/s, p95 ${num(p.p95Ms)} ms, CPU ${num(p.cpuPct ?? 0)}%.`);
+                }}
+              />
+              <NextTools current="validate" verdict={r.result.grade === "poor" ? "FAIL" : "PASS"} />
+            </>
           ) : (
             <ToolIdle nodes={svc.measuredSpec.nodes} startSpec={svc.measuredSpec} running={r.running} idleText={<>Import a load test (or try a sample), enter the CPU for one level, then validate.</>} />
           )}

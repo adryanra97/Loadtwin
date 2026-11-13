@@ -8,6 +8,7 @@ import { EXAMPLE_SERVICE } from "@/lib/defaults";
 import { num } from "@/lib/format";
 import { KEYS, usePersistent } from "@/lib/store";
 import type { Service } from "@/lib/types";
+import { MORE_TOOLS, TOOLS } from "@/lib/tools";
 import { Logo } from "./icons";
 
 const PRIMARY_NAV = [
@@ -16,14 +17,7 @@ const PRIMARY_NAV = [
   { href: "/evaluate/", label: "Evaluate" },
   { href: "/workspace/", label: "Workspace" },
 ];
-const MORE_NAV = [
-  { href: "/autosize/", label: "Auto-size" },
-  { href: "/patterns/", label: "Load patterns" },
-  { href: "/failures/", label: "Failure testing" },
-  { href: "/sensitivity/", label: "Sensitivity" },
-  { href: "/validate/", label: "Validate model" },
-  { href: "/ask/", label: "Ask LoadTwin" },
-];
+const MORE_NAV = MORE_TOOLS.map((id) => ({ href: TOOLS[id].href, label: TOOLS[id].name, hint: TOOLS[id].question, group: TOOLS[id].group }));
 
 type Engine = { state: "checking" } | { state: "up"; version: string; auth: boolean } | { state: "down" };
 
@@ -33,6 +27,11 @@ export function Header() {
   const [keyOpen, setKeyOpen] = useState(false);
   const [key, setKey] = useState("");
   const active = (href: string) => path === href || path + "/" === href || (href === "/workspace/" && /^\/(report|compare)/.test(path));
+
+  // Close the menus after navigating.
+  useEffect(() => {
+    document.querySelectorAll<HTMLDetailsElement>("details.lt-nav-more, details.lt-mobile-nav").forEach((d) => (d.open = false));
+  }, [path]);
 
   useEffect(() => {
     let alive = true;
@@ -53,8 +52,13 @@ export function Header() {
           <details className="lt-nav-more">
             <summary aria-label="More simulation tools" aria-current={MORE_NAV.some(item=>active(item.href)) ? "page" : undefined}>More tools <span aria-hidden="true">⌄</span></summary>
             <div className="lt-nav-dropdown">
-              <strong>Explore tools</strong>
-              {MORE_NAV.map((item) => <Link key={item.href} href={item.href} aria-current={active(item.href) ? "page" : undefined}>{item.label} <span aria-hidden="true">↗</span></Link>)}
+              <strong>Same model, other questions</strong>
+              {MORE_NAV.map((item) => (
+                <Link key={item.href} href={item.href} className="lt-tool-link" aria-current={active(item.href) ? "page" : undefined}>
+                  <span className="lt-tool-link-name">{item.label} <em>{item.group}</em></span>
+                  <span className="lt-tool-link-hint">{item.hint}</span>
+                </Link>
+              ))}
               <a href={API_BASE + "/api/docs"} target="_blank" rel="noopener noreferrer">API documentation <span aria-hidden="true">↗</span></a>
             </div>
           </details>
