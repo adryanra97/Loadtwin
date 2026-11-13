@@ -16,3 +16,10 @@ def target():
 @pytest.fixture
 def measurement():
     return Measurement(tps=40, cpu_pct=62, p95_ms=420, mem_pct=58, payload_kb=4)
+
+
+@pytest.fixture
+def examples_dir():
+    from pathlib import Path
+
+    return Path(__file__).resolve().parents[1] / "examples"

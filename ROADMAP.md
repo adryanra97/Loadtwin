@@ -2,36 +2,22 @@
 
 LoadTwin grows in small, shippable releases. Each item keeps the same rule as today: numbers come from the simulation, never from guesses.
 
-## v0.1 (this release)
+## Released
 
-- SimPy digital twin: multi-node cluster, thread and connection pools, shared database, external dependencies, timeouts, GC pressure.
-- Calibration from one load-test measurement; Universal Scalability Law for vCPU scaling.
-- Verdicts, limiting resource, Little's Law capacity, stress scenarios and breaking point.
-- HTTP API with Swagger, CLI, Docker image and Vercel deployment.
+- **v0.1**: SimPy digital twin, calibration from one measurement, Universal Scalability Law, verdicts, capacity, HTTP API, CLI, Docker and Vercel.
+- **v0.2**: web dashboard, Monte Carlo breach probability, cost-aware auto-sizing, load patterns (daily, spike, ramp, custom), and k6/JMeter/Locust import with multi-point validation.
 
-## v0.2: Auto-sizing with cost
-
-Give a target load and SLA; LoadTwin searches node count and machine size for the cheapest configuration that passes, using a configurable price list, and shows the cost/headroom trade-off.
-
-## v0.3: Confidence instead of a single run
-
-Monte Carlo replications per scenario: p95 distribution, probability of breaching the SLA, and verdicts that state their confidence.
-
-## v0.4: Realistic load
-
-Time-varying load (daily curves, ramps, spikes) and import of k6, JMeter and Locust results. Multi-point calibration with a holdout check of fit quality.
-
-## v0.5: Failure scenarios
+## v0.3: Failure scenarios
 
 One node down, a slow database, an external dependency timing out, memory leaks and overlapping batch jobs: does the cluster still meet its SLA?
 
-## v0.6: Sensitivity analysis
+## v0.4: Sensitivity analysis
 
 Which input moves p95 the most: vCPU, nodes, thread pool, database time? Tornado charts and "what to change first" advice.
 
-## v0.7: Web dashboard
+## v0.5: Compare and report
 
-A single-user dashboard: scenario workspace, side-by-side comparison, charts of every resource over time, and exportable reports.
+Save several scenarios, compare them side by side, and export a shareable report.
 
 ## Later
 

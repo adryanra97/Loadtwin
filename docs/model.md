@@ -75,11 +75,33 @@ Applied in order:
 
 **Limiting resource** at peak: if p95 is violated while no resource is above 85% and most time is spent waiting, the dominant wait (database or external) is the limit. Otherwise it is the most utilized resource if that is at least 60%, else the resource that bounds capacity. On a tie between a saturated database and the connection pools behind it, the database wins.
 
-## 6. Limitations
+6. With Monte Carlo replications: a breach probability of 50% or more → `FAIL`; above 5% turns a `PASS` into `PASS_WITH_CONDITIONS`.
 
-- One measurement point calibrates the model. Behaviour far above the measured load, especially where locks or caches change regime, is extrapolated; the far-extrapolation rule only partly guards against it.
+## 6. Monte Carlo replications
+
+A single run is one random draw of arrivals and service times. With `replications = N`, the peak scenario is simulated N times with independent seeds derived from the input (so the result is still reproducible). The breach probability is the share of runs that break any SLA limit; the response also gives breaches by cause and the min, p5, median, mean, p95 and max of p95, CPU and error rate across runs.
+
+## 7. Auto-sizing
+
+Calibration runs once on the measured environment. For each machine type in the catalog, the profile is rescaled with the USL for that vCPU count, and each node gets `vCPU × threadsPerVcpu` worker threads and the given connection pool. The search starts from the analytic node count `peak × cpuMs / (vCPU × CPU limit × 90% − background)`, walks up until the SLA holds, then down while it still holds (30-second measurement windows). That is the **minimal** configuration. The **comfortable** one adds up to four nodes until every resource is at or below 75% at peak; it stops early when the busiest resource is not one that more nodes relieve (memory per node, a shared database). Monthly cost is `hourly price × nodes × 730`. The recommendation is the cheapest comfortable configuration, or the cheapest minimal one when none is comfortable. When a shared database caps throughput below the peak (`maxConcurrentQueries × 80% / dbMs`), no search is run.
+
+## 8. Load patterns
+
+A pattern becomes back-to-back segments of constant rate: `daily` uses a fixed 24-hour business-day shape (each hour lasting `secondsPerHour`), `spike` is 60 s at base, the spike, then 90 s at base, `ramp` is ten equal steps, `custom` takes segments directly. Arrivals are Poisson within each segment, and the rate switches exactly at segment boundaries. Results are judged in 10-second windows on p95, error rate and CPU. Failures are counted in the window the request arrived in. Up to 5% of time in breach gives `PASS_WITH_CONDITIONS`; more gives `FAIL`. Recovery time is measured from the last drop of 20% or more in offered load until the first window that meets the SLA.
+
+## 9. Load-test import and validation
+
+- **k6**: `--summary-export` or `handleSummary` JSON, giving one point from `http_reqs.rate`, the p95 of `http_req_duration` and `http_req_failed`.
+- **JMeter**: results CSV (`timeStamp`, `elapsed`, `success`), cut into 30-second windows; neighbouring windows within 15% of each other's load merge into one step.
+- **Locust**: `*_stats_history.csv`, one point per `User Count` step, from the `Aggregated` rows.
+
+Load tools do not record server CPU, so the user supplies it for at least one point. The model calibrates on that point (by default the one nearest the median load) and predicts p95 at every other point. The grade is the mean absolute p95 error over the other points: up to 10% `good`, up to 25% `fair`, above `poor`. The validated range spans the loads where the error is at most 25%.
+
+## 10. Limitations
+
+- One measurement point calibrates the model (use Validate to check it against more). Behaviour far above the measured load, especially where locks or caches change regime, is extrapolated; the far-extrapolation rule only partly guards against it.
 - The USL coefficients are generic defaults, not fitted to your service.
-- Arrivals are Poisson at a constant rate within a scenario; bursts and daily curves are on the roadmap.
+- Arrivals are Poisson within each segment. Correlated bursts and client retries are not modelled.
 - A single service is modelled. Downstream services appear only as an external wait time.
 - Memory is modelled as baseline plus per-request usage; leaks and batch jobs exist in the engine but are not yet exposed in the API.
 

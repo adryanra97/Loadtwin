@@ -11,7 +11,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from loadtwin.engine import Profile, Spec, simulate
+from loadtwin.engine import Profile, Spec, simulate, usl_factor
 
 WAIT_MIN_MS = 2.0
 WAIT_MAX_MS = 20000.0
@@ -134,3 +134,57 @@ def calibrate(spec: Spec, m: Measurement, db_share: float = 0.6, seed: int = 1) 
         "databaseWaitMs": round(wait * db_share, 1),
         "externalWaitMs": round(wait * (1 - db_share), 1),
     }
+
+
+@dataclass
+class Database:
+    """Database behaviour of the service.
+
+    Attributes
+    ----------
+    wait_share : float, default 0.6
+        Share of non-CPU wait spent in the database; the rest is external dependencies.
+    max_concurrent_queries : int, default 0
+        Concurrent queries the shared database serves across all nodes; 0 means unlimited.
+    """
+
+    wait_share: float = 0.6
+    max_concurrent_queries: int = 0
+
+
+def prepare(
+    measured_spec: Spec, measurement: Measurement, target_spec: Spec, database: Database, seed: int
+) -> tuple[Profile, dict]:
+    """Calibrate on the measured environment and scale the profile to the target environment.
+
+    Parameters
+    ----------
+    measured_spec : Spec
+        Environment where the load test ran.
+    measurement : Measurement
+        What the load test observed.
+    target_spec : Spec
+        Environment to simulate.
+    database : Database
+        Database behaviour.
+    seed : int
+        Calibration seed.
+
+    Returns
+    -------
+    profile : Profile
+        Profile for ``target_spec``: CPU per request corrected with the Universal Scalability Law
+        and the shared database capacity applied.
+    info : dict
+        Calibration summary plus ``uslFactor``, ``targetCpuMsPerRequest`` and ``scaleRatio``.
+    """
+    profile, info = calibrate(measured_spec, measurement, database.wait_share, seed)
+    factor = usl_factor(measured_spec.vcpu, target_spec.vcpu)
+    profile.cpu_ms *= factor
+    profile.db_capacity = int(database.max_concurrent_queries)
+    info.update(
+        uslFactor=round(factor, 3),
+        targetCpuMsPerRequest=round(profile.cpu_ms, 1),
+        scaleRatio=round(target_spec.total_vcpu / measured_spec.total_vcpu, 2),
+    )
+    return profile, info

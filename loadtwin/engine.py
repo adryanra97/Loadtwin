@@ -183,7 +183,7 @@ class SimulationResult:
         database, latency percentiles, error and timeout rates, throughput and request counts.
     timeseries : list of dict
         One entry per ``BUCKET_S`` seconds with keys ``t``, ``cpu``, ``mem``, ``net``, ``thread``,
-        ``conn`` and ``p95``.
+        ``conn``, ``p95``, ``tps`` (offered), ``throughput`` and ``errorPct``.
     latency_breakdown_ms : dict
         Mean time per request spent in each stage: thread queue, CPU queue, CPU, connection queue,
         database and external dependencies.
@@ -233,8 +233,15 @@ def percentile(values: list[float], p: float) -> float:
     return s[k]
 
 
-def simulate(spec: Spec, profile: Profile, tps: float, seed: int, duration_s: float = DURATION_S) -> SimulationResult:
-    """Run one discrete-event simulation at a constant arrival rate.
+def simulate(
+    spec: Spec,
+    profile: Profile,
+    tps: float,
+    seed: int,
+    duration_s: float = DURATION_S,
+    schedule: list[tuple[float, float]] | None = None,
+) -> SimulationResult:
+    """Run one discrete-event simulation at a constant or piecewise-constant arrival rate.
 
     Parameters
     ----------
@@ -247,7 +254,10 @@ def simulate(spec: Spec, profile: Profile, tps: float, seed: int, duration_s: fl
     seed : int
         Random seed; the same seed gives the same result.
     duration_s : float, default DURATION_S
-        Measurement window after the warm-up, in seconds.
+        Measurement window after the warm-up, in seconds. Ignored when ``schedule`` is given.
+    schedule : list of (float, float), optional
+        Time-varying load as ``(duration_s, tps)`` segments after the warm-up. The warm-up runs at
+        the first segment's rate, and ``tps`` is then only used for the summary.
 
     Returns
     -------
@@ -264,6 +274,14 @@ def simulate(spec: Spec, profile: Profile, tps: float, seed: int, duration_s: fl
     """
     env = simpy.Environment()
     rng = random.Random(seed)
+    if schedule:
+        duration_s = sum(d for d, _ in schedule)
+        bounds, t = [], WARMUP_S
+        for d, rate in schedule:
+            t += d
+            bounds.append((t, rate))
+    else:
+        bounds = [(math.inf, tps)]
     total = WARMUP_S + duration_s
     nbucket = math.ceil(total / BUCKET_S)
 
@@ -290,6 +308,8 @@ def simulate(spec: Spec, profile: Profile, tps: float, seed: int, duration_s: fl
     b_conn = [0.0] * nbucket
     b_mem = [0.0] * nbucket
     b_n = [0] * nbucket
+    b_arr = [0] * nbucket
+    b_fail = [0] * nbucket
 
     def bucket(t: float) -> int:
         """Index of the time-series bucket for simulation time ``t``."""
@@ -327,7 +347,9 @@ def simulate(spec: Spec, profile: Profile, tps: float, seed: int, duration_s: fl
         t0 = env.now
         measured = t0 >= WARMUP_S
         st["arrived"] += 1 if measured else 0
+        b_arr[bucket(t0)] += 1
         if len(node.threads.queue) >= spec.thread_pool * QUEUE_FACTOR:
+            b_fail[bucket(t0)] += 1
             if measured:
                 st["rejected"] += 1
             return
@@ -343,6 +365,7 @@ def simulate(spec: Spec, profile: Profile, tps: float, seed: int, duration_s: fl
                 rec["connection_queue"] = env.now - t1
                 if cn not in got:
                     node.inflight -= 1
+                    b_fail[bucket(t0)] += 1
                     if measured:
                         st["connection_failed"] += 1
                     return
@@ -366,6 +389,8 @@ def simulate(spec: Spec, profile: Profile, tps: float, seed: int, duration_s: fl
             node.inflight -= 1
         lat = env.now - t0
         b_bytes[bucket(env.now)] += profile.payload_kb * 2 * 1024 * 8
+        if lat * 1000 > spec.timeout_ms:
+            b_fail[bucket(t0)] += 1
         if measured:
             st["completed"] += 1
             latencies.append(lat * 1000)
@@ -405,17 +430,36 @@ def simulate(spec: Spec, profile: Profile, tps: float, seed: int, duration_s: fl
             if pause > 0:
                 yield env.timeout(pause)
 
+    def rate_until(now: float) -> tuple[float, float]:
+        """Return the current arrival rate and when it changes (warm-up uses the first segment)."""
+        for end, rate in bounds:
+            if now < end:
+                return rate, end
+        return bounds[-1][1], math.inf
+
     def arrivals():
         """Poisson arrivals distributed round-robin over the nodes.
+
+        With a schedule, the rate is piecewise constant: an inter-arrival time that would cross a
+        segment boundary is discarded and drawn again from the boundary, which is exact for a
+        Poisson process because it is memoryless.
 
         Yields
         ------
         simpy.events.Timeout
-            Exponential inter-arrival time.
+            Exponential inter-arrival time, or the wait until the next segment.
         """
         i = 0
         while True:
-            yield env.timeout(rng.expovariate(tps))
+            rate, end = rate_until(env.now)
+            if rate <= 0:
+                yield env.timeout(end - env.now)
+                continue
+            dt = rng.expovariate(rate)
+            if env.now + dt > end:
+                yield env.timeout(end - env.now)
+                continue
+            yield env.timeout(dt)
             env.process(request(nodes[i % len(nodes)]))
             i += 1
 
@@ -473,6 +517,9 @@ def simulate(spec: Spec, profile: Profile, tps: float, seed: int, duration_s: fl
                 "thread": round(100 * b_thread[i] / n, 1),
                 "conn": round(100 * b_conn[i] / n, 1),
                 "p95": round(percentile(b_lat[i], 0.95)) if b_lat[i] else None,
+                "tps": round(b_arr[i] / BUCKET_S, 1),
+                "throughput": round(len(b_lat[i]) / BUCKET_S, 1),
+                "errorPct": round(100 * b_fail[i] / b_arr[i], 2) if b_arr[i] else 0.0,
             }
         )
     window = [d for d in series if d["t"] > 0]

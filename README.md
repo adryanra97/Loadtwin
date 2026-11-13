@@ -4,6 +4,15 @@
 
 LoadTwin is a discrete-event **digital twin** for capacity planning. Give it one load-test measurement from a small environment and the spec of the environment you care about, and it tells you whether that environment survives normal, peak and stress load: with a verdict, the limiting resource, the maximum sustainable load and the latency you should expect.
 
+It answers four questions, in a web dashboard, over HTTP or from the command line:
+
+| Tool | Question | Answer |
+|---|---|---|
+| **Evaluate** | Does the target setup meet the SLA at peak, and how likely is it to break? | Verdict, limiting resource, capacity, breaking point, and a Monte Carlo breach probability. |
+| **Auto-size** | What is the cheapest cluster that carries my peak load? | Fewest nodes per machine type that pass, priced per month, with a headroom-safe recommendation. |
+| **Load patterns** | Does it survive a daily curve, a spike or a ramp? | Time over the SLA in 10-second windows, the worst moment and the recovery time. |
+| **Validate** | How far can I trust the model? | Import k6, JMeter or Locust results; calibrate on one level, predict the rest, and get a fit grade and validated range. |
+
 ```text
 $ loadtwin evaluate examples/evaluate-pass.json
 Verdict: PASS   limiting resource: cpu   (1.1 s)
@@ -44,6 +53,12 @@ Same input, same output: every run is seeded from its input.
 
 Stress scenarios are reported, and the first failing one is the `breakingPointTps`, but they never change the verdict.
 
+## Dashboard
+
+A single-user web app, one origin with the API, no sign-in. Describe your service once (where you measured, what you saw, where it will run, your SLA) and every tool uses it. Everything you enter stays in your browser, with JSON export and import.
+
+Built around usability heuristics: the engine status and run progress are always visible, with an estimate and a Cancel button; inputs mirror the API's limits and are checked inline in plain language; advanced settings sit behind "More settings"; results lead with a verdict and its reasons, then the numbers, then charts (with hover details and a table view). It works on a phone and in dark mode, and has no accessibility violations reported by axe.
+
 ## Quick start
 
 ### Docker
@@ -52,7 +67,14 @@ Stress scenarios are reported, and the first failing one is the `breakingPointTp
 docker compose up --build        # or: docker build -t loadtwin . && docker run -p 8000:8000 loadtwin
 ```
 
-Open <http://localhost:8000/docs> for the interactive API.
+Open <http://localhost:8000> for the dashboard and <http://localhost:8000/api/docs> for the interactive API.
+
+### Local development
+
+```bash
+pip install -e ".[dev]" && uvicorn loadtwin.api:app --reload          # API on :8000
+cd web && npm ci && NEXT_PUBLIC_API_BASE=http://localhost:8000 npm run dev   # dashboard on :3000
+```
 
 ### Python
 
@@ -65,20 +87,26 @@ loadtwin serve --port 8000       # same API as the Docker image
 
 ### Vercel
 
-The repository is ready to import into Vercel as is: `api/index.py` serves the whole API from one Python Function and `vercel.json` routes every path to it. Set `LOADTWIN_API_KEY` in the project settings to require `Authorization: Bearer <key>` on `/v1/*`.
+Import the repository into Vercel and deploy; no settings are needed. `vercel.json` builds the dashboard as static files (`web/out`) and serves the API from one Python Function (`api/index.py`) under `/api`. Set `LOADTWIN_API_KEY` in the project's environment variables to require `Authorization: Bearer <key>` on `/api/v1/*`; the dashboard then asks for the key and keeps it only for the browser tab.
+
+Heavy requests are bounded so each finishes well inside the function's 60-second limit (for example, Monte Carlo runs x peak load at most 6,000, and machine types x peak load at most 3,000 for auto-sizing).
 
 ## API
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/health` | Liveness and version. |
-| `GET` | `/docs` | Swagger UI with ready-to-run examples. |
-| `GET` | `/v1/examples` | Example request bodies. |
-| `POST` | `/v1/evaluate` | Verdict, reasons, conditions, limiting resource, calibration, scenarios, capacity. |
-| `POST` | `/v1/simulate` | Calibrate and simulate up to 10 loads, without SLA or verdict. |
+| `GET` | `/api/health` | Liveness, version, and whether an API key is required. |
+| `GET` | `/api/docs` | Swagger UI with ready-to-run examples. |
+| `GET` | `/api/v1/examples` | Example request bodies for every endpoint. |
+| `POST` | `/api/v1/evaluate` | Verdict, reasons, conditions, limiting resource, calibration, scenarios, capacity. Add `"replications": 20` for Monte Carlo. |
+| `POST` | `/api/v1/autosize` | Cheapest cluster per machine type that meets the SLA at `peakTps`, with monthly cost. |
+| `POST` | `/api/v1/pattern` | Run a `daily`, `spike`, `ramp` or `custom` load pattern and judge it in 10-second windows. |
+| `POST` | `/api/v1/loadtest/parse` | Turn a k6 summary, JMeter results CSV or Locust stats history into load points. |
+| `POST` | `/api/v1/validate` | Calibrate on one point and score predictions against every other point. |
+| `POST` | `/api/v1/simulate` | Calibrate and simulate up to 10 loads, without SLA or verdict. |
 
 ```bash
-curl -s -X POST http://localhost:8000/v1/evaluate \
+curl -s -X POST http://localhost:8000/api/v1/evaluate \
   -H 'Content-Type: application/json' \
   -d '{
     "measuredSpec": {"vcpu": 4, "ramGb": 8, "nodes": 2, "threadPool": 100, "connPool": 30},
@@ -109,6 +137,9 @@ Request size is bounded (up to 2,000 TPS per scenario, 50 nodes, 10 loads) so a 
 | [`evaluate-scale-up.json`](examples/evaluate-scale-up.json) | Target 10x larger than the test environment | `PASS_WITH_CONDITIONS`: far extrapolation |
 | [`evaluate-database-bound.json`](examples/evaluate-database-bound.json) | Small shared database | `PASS_WITH_CONDITIONS`: database at 92%, limited by database |
 | [`simulate.json`](examples/simulate.json) | Raw curve at 8, 45, 75 and 90 TPS | p95 419, 432, 459, 595 ms as CPU approaches saturation |
+| [`loadtests/`](examples/loadtests) | Synthetic k6, JMeter and Locust outputs (10 to 55 TPS steps) | Validation grade `good`, mean p95 error about 5% |
+
+The machine prices in auto-sizing (`general-*`, `compute-*`) are illustrative, not any provider's list prices. Replace them with your own in the dashboard or in the request.
 
 ## How it works
 
@@ -122,11 +153,11 @@ pytest
 ruff check . && ruff format --check .
 ```
 
-CI runs lint, tests on Python 3.12 and 3.13, and builds and smoke-tests the Docker image.
+CI runs lint, tests on Python 3.12 and 3.13, a type-check and build of the dashboard, and builds and smoke-tests the Docker image (API and dashboard).
 
 ## Roadmap
 
-See [ROADMAP.md](ROADMAP.md): cost-aware auto-sizing, Monte Carlo confidence, time-varying load and load-test imports, failure scenarios, sensitivity analysis, and a web dashboard.
+See [ROADMAP.md](ROADMAP.md): failure scenarios, sensitivity analysis, side-by-side comparison and reports.
 
 ## License
 

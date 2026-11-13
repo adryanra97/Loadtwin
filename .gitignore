@@ -12,3 +12,11 @@ build/
 .vercel/
 .env
 .DS_Store
+
+# Dashboard
+web/node_modules/
+web/.next/
+web/out/
+web/public/samples/
+web/next-env.d.ts
+web/tsconfig.tsbuildinfo
