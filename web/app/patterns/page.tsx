@@ -3,7 +3,8 @@
 import { LineChart } from "@/components/charts";
 import { Trash } from "@/components/icons";
 import { RunBar, useRun } from "@/components/run";
-import { PendingStage, TwinStage } from "@/components/twin-stage";
+import { TwinStage } from "@/components/twin-stage";
+import { ReplayOrLive, ToolIdle } from "@/components/live-playground";
 import { breachBands, patternFrames } from "@/lib/replay";
 import { ServiceStrip, useService } from "@/components/shell";
 import { NumberField, Segmented, Stat, VerdictBanner } from "@/components/ui";
@@ -253,7 +254,7 @@ export default function PatternsPage() {
           {r.result ? (
             <Results res={r.result} sla={svc.sla} stale={r.running} nodes={svc.targetSpec.nodes} />
           ) : (
-            <PendingStage nodes={svc.targetSpec.nodes} running={r.running} idleText={<>Pick a pattern, check the preview, then run it.</>} />
+            <ToolIdle nodes={svc.targetSpec.nodes} startTps={Number(p.baseTps) || undefined} running={r.running} idleText={<>Pick a pattern, check the preview, then run it.</>} />
           )}
         </section>
       </div>
@@ -291,17 +292,20 @@ function Results({
           ))}
         </ul>
       </VerdictBanner>
-      <div className="card">
-        <TwinStage
-          title="Replay of the pattern"
-          nodes={nodes}
-          frames={frames}
-          slaP95={sla.maxP95Ms}
-          slaCpu={sla.maxCpuPct}
-          bands={breachBands(frames, 10)}
-          caption="Each dot is a request. Node fill is CPU, ticks in front of a node are waiting requests, red dots fail. The values are the simulation's, window by window."
-        />
-      </div>
+      <ReplayOrLive
+        startTps={Math.max(...res.windows.map((w) => w.offeredTps))}
+        replay={
+          <TwinStage
+            title="Replay of the pattern"
+            nodes={nodes}
+            frames={frames}
+            slaP95={sla.maxP95Ms}
+            slaCpu={sla.maxCpuPct}
+            bands={breachBands(frames, 10)}
+            caption="Each dot is a request. Node fill is CPU, ticks in front of a node are waiting requests, red dots fail. The values are the simulation's, window by window."
+          />
+        }
+      />
       <div className="stats">
         <Stat k="Time over the SLA" v={seconds(res.breachSeconds)} s={`${pct(res.breachShare * 100)} of the pattern`} />
         <Stat

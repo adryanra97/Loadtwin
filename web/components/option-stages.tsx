@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { num } from "@/lib/format";
 import type { AutosizeResult, SensitivityResult } from "@/lib/types";
+import { ReplayOrLive } from "./live-playground";
+import { useService } from "./shell";
 import { TwinStage } from "./twin-stage";
 import { Segmented } from "./ui";
 
@@ -15,10 +17,11 @@ export function AutosizeStage({ res, slaP95, slaCpu }: { res: AutosizeResult; sl
       : []),
   ];
   const [pick, setPick] = useState(choices[0]?.value ?? "rec");
+  const [svc] = useService();
   const cfg = (choices.find((c) => c.value === pick) ?? choices[0])?.cfg;
   if (!cfg) return null;
   return (
-    <div className="card stack-sm">
+    <div className="stack-sm">
       {choices.length > 1 && (
         <Segmented
           name="as-stage"
@@ -28,24 +31,30 @@ export function AutosizeStage({ res, slaP95, slaCpu }: { res: AutosizeResult; sl
           onChange={setPick}
         />
       )}
-      <TwinStage
-        key={pick}
-        title={`${cfg.nodes} × ${cfg.machine.name} at ${num(res.peakTps)} req/s`}
-        nodes={cfg.nodes}
-        frames={[
-          {
-            t: 0,
-            tps: res.peakTps,
-            cpu: cfg.peak.cpuPct,
-            thread: cfg.peak.threadPct,
-            p95: cfg.peak.p95Ms,
-            err: cfg.peak.errorRatePct,
-          },
-        ]}
-        maxTps={res.peakTps}
-        slaP95={slaP95}
-        slaCpu={slaCpu}
-        caption="Node fill is the CPU this cluster reaches at peak in the simulation."
+      <ReplayOrLive
+        startTps={res.peakTps}
+        startSpec={{ ...svc.targetSpec, nodes: cfg.nodes, vcpu: cfg.machine.vcpu, ramGb: cfg.machine.ramGb }}
+        replay={
+          <TwinStage
+            key={pick}
+            title={`${cfg.nodes} × ${cfg.machine.name} at ${num(res.peakTps)} req/s`}
+            nodes={cfg.nodes}
+            frames={[
+              {
+                t: 0,
+                tps: res.peakTps,
+                cpu: cfg.peak.cpuPct,
+                thread: cfg.peak.threadPct,
+                p95: cfg.peak.p95Ms,
+                err: cfg.peak.errorRatePct,
+              },
+            ]}
+            maxTps={res.peakTps}
+            slaP95={slaP95}
+            slaCpu={slaCpu}
+            caption="Node fill is the CPU this cluster reaches at peak in the simulation."
+          />
+        }
       />
     </div>
   );

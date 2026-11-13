@@ -2,7 +2,7 @@
 
 import { RunBar, useRun } from "@/components/run";
 import { SensitivityStage } from "@/components/option-stages";
-import { PendingStage } from "@/components/twin-stage";
+import { ToolIdle } from "@/components/live-playground";
 import { ServiceStrip, useService } from "@/components/shell";
 import { NumberField, Stat } from "@/components/ui";
 import { check, type FieldDef } from "@/lib/fields";
@@ -115,7 +115,7 @@ export default function SensitivityPage() {
           {r.result ? (
             <Results res={r.result} slaP95={svc.sla.maxP95Ms} stale={r.running} nodes={svc.targetSpec.nodes} />
           ) : (
-            <PendingStage nodes={svc.targetSpec.nodes} running={r.running} idleText={<>Set the load and press Analyse. A load close to your limit shows the clearest differences.</>} />
+            <ToolIdle nodes={svc.targetSpec.nodes} startTps={Number(st.peakTps) || undefined} running={r.running} idleText={<>Set the load and press Analyse. A load close to your limit shows the clearest differences.</>} />
           )}
         </section>
       </div>

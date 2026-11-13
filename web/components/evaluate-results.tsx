@@ -6,6 +6,7 @@ import { Stat, VerdictBadge, VerdictBanner } from "@/components/ui";
 import { num, pct, resourceName } from "@/lib/format";
 import { evaluateFrames, breachBands } from "@/lib/replay";
 import type { EvaluateResult, Service } from "@/lib/types";
+import { ReplayOrLive } from "./live-playground";
 import { TwinStage } from "./twin-stage";
 
 const SCENARIO_NAME: Record<string, string> = { normal: "Normal", peak: "Peak" };
@@ -56,18 +57,21 @@ export function EvaluateResults({
       </VerdictBanner>
 
       {nodes !== undefined && frames.length > 0 && (
-        <div className="card">
-          <TwinStage
-            title="Replay of the peak run"
-            nodes={nodes}
-            frames={frames}
-            hasExt={res.calibration.externalWaitMs > 0.5}
-            slaP95={sla.maxP95Ms}
-            slaCpu={sla.maxCpuPct}
-            bands={breachBands(frames, 2)}
-            caption="Each dot is a request. Node fill is CPU, ticks in front of a node are waiting requests, red dots fail. Every value comes from the simulation, second by second."
-          />
-        </div>
+        <ReplayOrLive
+          startTps={peak?.tps}
+          replay={
+            <TwinStage
+              title="Replay of the peak run"
+              nodes={nodes}
+              frames={frames}
+              hasExt={res.calibration.externalWaitMs > 0.5}
+              slaP95={sla.maxP95Ms}
+              slaCpu={sla.maxCpuPct}
+              bands={breachBands(frames, 2)}
+              caption="Each dot is a request. Node fill is CPU, ticks in front of a node are waiting requests, red dots fail. Every value comes from the simulation, second by second."
+            />
+          }
+        />
       )}
 
       <div className="stats">

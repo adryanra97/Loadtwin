@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { EvaluateResults } from "@/components/evaluate-results";
 import { SaveScenario, type EvaluateInput } from "@/components/save-scenario";
-import { PendingStage } from "@/components/twin-stage";
+import { ToolIdle } from "@/components/live-playground";
 import { useRun, RunBar } from "@/components/run";
 import { ServiceStrip, useService } from "@/components/shell";
 import { NumberField, Notice, Stat, VerdictBadge, VerdictBanner } from "@/components/ui";
@@ -175,7 +175,7 @@ export default function EvaluatePage() {
               {lastInput && !r.running && <SaveScenario key={`${r.result.durationS}-${r.result.verdict}`} input={lastInput} result={r.result} />}
             </>
           ) : (
-            <Empty running={r.running} nodes={svc.targetSpec.nodes} />
+            <Empty running={r.running} nodes={svc.targetSpec.nodes} peak={Number(st.peakTps) || undefined} />
           )}
         </section>
       </div>
@@ -183,7 +183,14 @@ export default function EvaluatePage() {
   );
 }
 
-function Empty({ running, nodes }: { running: boolean; nodes: number }) {
-  return <PendingStage nodes={nodes} running={running} idleText="Check the load and press Evaluate. The example service works as is." />;
+function Empty({ running, nodes, peak }: { running: boolean; nodes: number; peak?: number }) {
+  return (
+    <ToolIdle
+      nodes={nodes}
+      running={running}
+      startTps={peak}
+      idleText="Try it live above, or check the load and press Evaluate for the full verdict. The example service works as is."
+    />
+  );
 }
 

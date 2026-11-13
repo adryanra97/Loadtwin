@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { EvaluateResults } from "@/components/evaluate-results";
 import { RunBar, useRun } from "@/components/run";
-import { PendingStage, TwinStage } from "@/components/twin-stage";
+import { TwinStage } from "@/components/twin-stage";
+import { ToolIdle } from "@/components/live-playground";
 import { breachBands, faultFrames, patternFrames } from "@/lib/replay";
 import { ServiceStrip, useService } from "@/components/shell";
 import { Notice, VerdictBadge } from "@/components/ui";
@@ -202,7 +203,7 @@ export default function AskPage() {
           {r.result ? (
             <Answer a={r.result} q={r.running ? asked : last?.q || asked} stale={r.running} sla={svc.sla} onOpen={open} />
           ) : (
-            <PendingStage nodes={svc.targetSpec.nodes} running={r.running} idleText={<>The answer shows what was simulated, the explanation, and the numbers behind it.</>} />
+            <ToolIdle nodes={svc.targetSpec.nodes} startTps={peak} running={r.running} idleText={<>The answer shows what was simulated, the explanation, and the numbers behind it.</>} />
           )}
         </section>
       </div>

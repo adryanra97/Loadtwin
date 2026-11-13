@@ -5,7 +5,8 @@ import { useState } from "react";
 import { LineChart } from "@/components/charts";
 import { Trash, Upload } from "@/components/icons";
 import { RunBar, useRun } from "@/components/run";
-import { PendingStage, TwinStage } from "@/components/twin-stage";
+import { TwinStage } from "@/components/twin-stage";
+import { ReplayOrLive, ToolIdle } from "@/components/live-playground";
 import { validateFrames } from "@/lib/replay";
 import { ServiceStrip, useService } from "@/components/shell";
 import { Notice, Stat } from "@/components/ui";
@@ -13,7 +14,7 @@ import { ApiError, post } from "@/lib/api";
 import { check, type FieldDef } from "@/lib/fields";
 import { num, pct } from "@/lib/format";
 import { KEYS, usePersistent } from "@/lib/store";
-import type { LoadPoint, ValidateResult } from "@/lib/types";
+import type { LoadPoint, Spec, ValidateResult } from "@/lib/types";
 
 type Row = { tps: number | ""; p95Ms: number | ""; errorRatePct: number | ""; cpuPct: number | ""; memPct: number | "" };
 type Draft = { source: string; rows: Row[]; calibrate: number };
@@ -300,6 +301,7 @@ export default function ValidatePage() {
           {r.result ? (
             <Results
               nodes={svc.measuredSpec.nodes}
+              measuredSpec={svc.measuredSpec}
               res={r.result}
               stale={r.running}
               applied={applied}
@@ -320,7 +322,7 @@ export default function ValidatePage() {
               }}
             />
           ) : (
-            <PendingStage nodes={svc.measuredSpec.nodes} running={r.running} idleText={<>Import a load test (or try a sample), enter the CPU for one level, then validate.</>} />
+            <ToolIdle nodes={svc.measuredSpec.nodes} startSpec={svc.measuredSpec} running={r.running} idleText={<>Import a load test (or try a sample), enter the CPU for one level, then validate.</>} />
           )}
         </section>
       </div>
@@ -339,12 +341,14 @@ function Results({
   onApply,
   applied,
   nodes,
+  measuredSpec,
 }: {
   res: ValidateResult;
   stale: boolean;
   onApply: () => void;
   applied: string;
   nodes: number;
+  measuredSpec: Spec;
 }) {
   const g = GRADE[res.grade];
   const pts = [...res.points].sort((a, b) => a.tps - b.tps);
@@ -364,15 +368,19 @@ function Results({
           </ul>
         </div>
       </section>
-      <div className="card">
-        <TwinStage
-          title="Replay of each load level"
-          nodes={nodes}
-          frames={validateFrames(res)}
-          speedHint={2.5}
-          caption="The twin steps through every load level of your test. The readout is the model's prediction; the badge shows what the load test measured."
-        />
-      </div>
+      <ReplayOrLive
+        startSpec={measuredSpec}
+        startTps={res.points[res.calibrationIndex]?.tps}
+        replay={
+          <TwinStage
+            title="Replay of each load level"
+            nodes={nodes}
+            frames={validateFrames(res)}
+            speedHint={2.5}
+            caption="The twin steps through every load level of your test. The readout is the model's prediction; the badge shows what the load test measured."
+          />
+        }
+      />
       <div className="stats">
         <Stat k="Average p95 error" v={res.meanAbsErrorPct === null ? "—" : pct(res.meanAbsErrorPct, 1)} s="On levels not used for calibration" />
         <Stat

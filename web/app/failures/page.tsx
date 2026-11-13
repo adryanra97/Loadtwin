@@ -2,7 +2,8 @@
 
 import { LineChart } from "@/components/charts";
 import { RunBar, useRun } from "@/components/run";
-import { PendingStage, TwinStage } from "@/components/twin-stage";
+import { TwinStage } from "@/components/twin-stage";
+import { ReplayOrLive, ToolIdle } from "@/components/live-playground";
 import { breachBands, faultFrames } from "@/lib/replay";
 import { ServiceStrip, useService } from "@/components/shell";
 import { NumberField, Stat, VerdictBanner } from "@/components/ui";
@@ -160,7 +161,7 @@ export default function FailuresPage() {
           {r.result ? (
             <Results res={r.result} sla={svc.sla} stale={r.running} />
           ) : (
-            <PendingStage nodes={svc.targetSpec.nodes} running={r.running} idleText={<>Pick a failure and run it. “A node crashes” is a good first test of N+1 redundancy.</>} />
+            <ToolIdle nodes={svc.targetSpec.nodes} startTps={Number(st.tps) || undefined} running={r.running} idleText={<>Pick a failure and run it. “A node crashes” is a good first test of N+1 redundancy.</>} />
           )}
         </section>
       </div>
@@ -200,18 +201,21 @@ function Results({
           ))}
         </ul>
       </VerdictBanner>
-      <div className="card">
-        <TwinStage
-          title="Replay of the failure"
-          nodes={res.failure.nodes}
-          frames={frames}
-          slaP95={sla.maxP95Ms}
-          slaCpu={sla.maxCpuPct}
-          speedHint={6}
-          bands={[{ x0: res.failure.startS, x1: res.failure.endS, kind: "fault" }, ...breachBands(frames, 10)]}
-          caption="Watch the failure hit: crashed nodes go grey and their traffic moves to the rest, a slow database pulses amber, a failing dependency turns red. The amber stretch on the timeline is the failure."
-        />
-      </div>
+      <ReplayOrLive
+        startTps={res.failure.tps}
+        replay={
+          <TwinStage
+            title="Replay of the failure"
+            nodes={res.failure.nodes}
+            frames={frames}
+            slaP95={sla.maxP95Ms}
+            slaCpu={sla.maxCpuPct}
+            speedHint={6}
+            bands={[{ x0: res.failure.startS, x1: res.failure.endS, kind: "fault" }, ...breachBands(frames, 10)]}
+            caption="Watch the failure hit: crashed nodes go grey and their traffic moves to the rest, a slow database pulses amber, a failing dependency turns red. The amber stretch on the timeline is the failure."
+          />
+        }
+      />
       <div className="stats">
         <Stat
           k="p95 during the failure"

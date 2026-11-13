@@ -4,7 +4,7 @@ import { BarList } from "@/components/charts";
 import { Trash } from "@/components/icons";
 import { RunBar, useRun } from "@/components/run";
 import { AutosizeStage } from "@/components/option-stages";
-import { PendingStage } from "@/components/twin-stage";
+import { ToolIdle } from "@/components/live-playground";
 import { ServiceStrip, useService } from "@/components/shell";
 import { Notice, NumberField, Stat } from "@/components/ui";
 import { DEFAULT_CATALOG, LIMITS } from "@/lib/defaults";
@@ -230,7 +230,7 @@ export default function AutosizePage() {
           {r.result ? (
             <Results res={r.result} stale={r.running} sla={svc.sla} />
           ) : (
-            <PendingStage nodes={svc.targetSpec.nodes} running={r.running} idleText={<>Set the peak load and the machine types you can buy, then search.</>} />
+            <ToolIdle nodes={svc.targetSpec.nodes} startTps={Number(st.peakTps) || undefined} running={r.running} idleText={<>Set the peak load and the machine types you can buy, then search.</>} />
           )}
         </section>
       </div>

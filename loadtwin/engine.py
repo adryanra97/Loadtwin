@@ -616,7 +616,7 @@ def simulate(
         series.append(
             {
                 "t": round((i + 1) * BUCKET_S - WARMUP_S, 1),
-                "cpu": round(100 * (b_cpu[i] + batch_part) / cpu_cap, 1),
+                "cpu": round(min(100 * (b_cpu[i] + batch_part) / cpu_cap, 100.0), 1),
                 "mem": round(100 * b_mem[i] / n, 1),
                 "net": round(100 * b_bytes[i] / net_cap, 2),
                 "thread": round(100 * b_thread[i] / n, 1),
