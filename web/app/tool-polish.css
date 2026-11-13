@@ -1,0 +1,53 @@
+/* Shared product polish across existing simulation tools — keeps all calculations and controls intact. */
+main:not(:has(.lt-home)):not(:has(.lt-service)){max-width:1280px;padding:37px 22px 76px}
+main:not(:has(.lt-home)):not(:has(.lt-service))>.page-head,
+main:not(:has(.lt-home)):not(:has(.lt-service))>div>.page-head{margin-bottom:26px;gap:9px}
+.page-head h1{font:750 clamp(32px,3vw,43px)/1.13 var(--display);letter-spacing:-.045em;color:var(--ink)}
+.page-head .lede{font-size:14px;line-height:1.7;max-width:780px;color:var(--ink-2)}
+.tool{gap:25px;grid-template-columns:minmax(320px,375px) minmax(0,1fr)}
+.tool.tool-even{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tool>aside{top:102px}
+.card{border-radius:15px;padding:22px;border-color:var(--line);box-shadow:0 8px 28px #16386407}
+.card h2,.card h3{letter-spacing:-.025em}
+.card-head{margin-bottom:17px}
+.card:has(>fieldset){padding:23px}
+fieldset>legend{font-weight:800;color:var(--ink);letter-spacing:-.012em}
+.field{gap:6px}
+.field label,.label{font-size:12px;font-weight:750}
+.input-wrap{border-radius:10px}
+.input-wrap input,.input-wrap select{min-height:43px}
+input[type=text].plain,textarea.plain{border-radius:10px;min-height:43px}
+.btn{border-radius:10px;min-height:41px;font-size:13px}
+.btn-sm{min-height:35px}
+.btn-primary{font-weight:750}
+.btn:disabled{opacity:.52}
+.hint{line-height:1.55;font-size:11px}
+.error{font-size:12px}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:800}
+.stat .v{letter-spacing:-.045em}
+.stats{gap:13px}
+.stat{border-color:var(--line)}
+.tool-card{border:1px solid var(--line);border-radius:14px}
+.tool-card:hover{border-color:var(--accent)}
+.table-wrap{border-radius:12px}
+thead th{padding:11px 14px;font-weight:750;letter-spacing:.01em}
+tbody td{padding:10px 14px}
+tbody tr:hover td{background:color-mix(in srgb,var(--surface-2) 55%,transparent)}
+.chart .axis text{fill:var(--muted)}
+.more>summary{font-size:12px;font-weight:700}
+.notice{border-radius:12px}
+.verdict{border-radius:15px}
+footer{line-height:1.7;padding-top:27px}
+@media(max-width:960px){
+ .tool,.tool.tool-even{grid-template-columns:1fr;gap:20px}
+ .tool>aside{position:static}
+}
+@media(max-width:600px){
+ main:not(:has(.lt-home)):not(:has(.lt-service)){padding:22px 14px 50px}
+ .card{padding:17px}
+ .card:has(>fieldset){padding:18px}
+ .page-head h1{font-size:33px}
+ .page-head .lede{font-size:13px}
+ .grid-cards{grid-template-columns:1fr}
+ .tool{gap:15px}
+}
