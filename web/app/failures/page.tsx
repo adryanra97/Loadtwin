@@ -1,4 +1,5 @@
 "use client";
+import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import { LineChart } from "@/components/charts";
 import { RunBar, useRun } from "@/components/run";
@@ -66,13 +67,7 @@ export default function FailuresPage() {
 
   return (
     <div>
-      <div className="page-head">
-        <h1>Failures</h1>
-        <p className="lede">
-          Break part of the system on purpose and see whether the service still meets its SLA, how bad it gets, and how fast it
-          recovers. The same run is simulated healthy for comparison.
-        </p>
-      </div>
+      <ToolPageIntro category="RESILIENCE TESTING" title="Failures" description="Break part of the system on purpose and see whether the service still meets its SLA, how bad it gets, and how fast it recovers. The same run is simulated healthy for comparison." />
       <div className="tool">
         <aside className="stack">
           <ServiceStrip />
