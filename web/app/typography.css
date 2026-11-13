@@ -528,3 +528,76 @@ body .tool > aside {
     box-shadow: 0 -10px 20px -14px rgba(10, 42, 65, 0.35);
   }
 }
+
+/* ---------- Hero model explorer in motion ---------- */
+.ed-architecture-modes {
+  position: relative;
+}
+.ed-arch-cycle {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: -1px;
+  height: 1px;
+  background: rgba(136, 221, 236, 0.55);
+  transform-origin: left;
+  animation: ed-cycle linear forwards;
+}
+@keyframes ed-cycle {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.ed-arch-packet {
+  fill: #a6f1f6;
+  filter: drop-shadow(0 0 4px rgba(130, 221, 234, 0.85));
+}
+.ed-arch-packet.is-drop {
+  fill: #ffb48a;
+  filter: drop-shadow(0 0 4px rgba(255, 150, 100, 0.85));
+}
+.ed-architecture.is-stressed .ed-arch-packet:not(.is-drop) {
+  fill: #ffd9b8;
+}
+.ed-arch-load-track {
+  fill: rgba(140, 195, 215, 0.18);
+}
+.ed-arch-load {
+  fill: #82d6e9;
+  transition: fill 0.3s;
+}
+.ed-architecture.is-stressed .ed-arch-load {
+  fill: #ffa975;
+}
+.ed-arch-service > rect:first-child {
+  transition: stroke 0.4s;
+}
+.ed-architecture.is-stressed .ed-arch-service > rect:first-child {
+  stroke: #e89a6c;
+}
+.ed-architecture.is-live .ed-arch-led {
+  animation: ed-led 1.6s ease-in-out infinite;
+}
+.ed-architecture.is-live.is-stressed .ed-arch-led {
+  animation-duration: 0.6s;
+}
+.ed-arch-service:nth-of-type(2) .ed-arch-led {
+  animation-delay: 0.3s;
+}
+.ed-arch-service:nth-of-type(3) .ed-arch-led {
+  animation-delay: 0.6s;
+}
+@keyframes ed-led {
+  50% {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ed-arch-cycle,
+  .ed-architecture .ed-arch-led {
+    animation: none !important;
+  }
+}
