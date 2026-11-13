@@ -1,4 +1,5 @@
 "use client";
+import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -122,13 +123,7 @@ export default function ValidatePage() {
 
   return (
     <div>
-      <div className="page-head">
-        <h1>Validate the model</h1>
-        <p className="lede">
-          Import a load test with several load levels. The twin calibrates on one level and predicts the others; how close it
-          gets tells you how far its answers can be trusted.
-        </p>
-      </div>
+      <ToolPageIntro category="MODEL VALIDATION" title="Validate the model" description="Import a load test with several load levels. The twin calibrates on one level and predicts the others; how close it gets tells you how far its answers can be trusted." />
       <div className="tool tool-even">
         <aside className="stack">
           <ServiceStrip show={["measured"]} />
