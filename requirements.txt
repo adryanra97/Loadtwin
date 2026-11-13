@@ -1,0 +1,5 @@
+# Runtime dependencies (Vercel and Docker). Keep in sync with [project].dependencies in pyproject.toml.
+fastapi==0.162.0
+pydantic==2.13.5
+simpy==4.1.2
+uvicorn==0.54.0

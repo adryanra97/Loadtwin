@@ -1,0 +1,43 @@
+{
+  "measuredSpec": {
+    "vcpu": 4,
+    "ramGb": 8,
+    "nodes": 2,
+    "threadPool": 100,
+    "connPool": 30,
+    "timeoutMs": 3000
+  },
+  "measurement": {
+    "tps": 40,
+    "cpuPct": 62,
+    "p95Ms": 420,
+    "memPct": 58,
+    "payloadKb": 4,
+    "errorRatePct": 0.1
+  },
+  "targetSpec": {
+    "vcpu": 4,
+    "ramGb": 8,
+    "nodes": 3,
+    "threadPool": 120,
+    "connPool": 30,
+    "timeoutMs": 2000
+  },
+  "load": {
+    "normalTps": 8,
+    "peakTps": 90,
+    "stressMultipliers": [
+      1.5
+    ]
+  },
+  "sla": {
+    "maxP95Ms": 800,
+    "maxErrorRatePct": 1,
+    "maxCpuPct": 80,
+    "maxMemPct": 85
+  },
+  "database": {
+    "waitShare": 0.6,
+    "maxConcurrentQueries": 60
+  }
+}

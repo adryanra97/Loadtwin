@@ -1,0 +1,11 @@
+services:
+  loadtwin:
+    build: .
+    image: loadtwin:latest
+    ports:
+      - "8000:8000"
+    environment:
+      # Set to require "Authorization: Bearer <key>" on /v1/*
+      LOADTWIN_API_KEY: ${LOADTWIN_API_KEY:-}
+      LOADTWIN_CORS_ORIGINS: ${LOADTWIN_CORS_ORIGINS:-*}
+    restart: unless-stopped

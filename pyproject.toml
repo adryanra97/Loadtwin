@@ -1,0 +1,55 @@
+[project]
+name = "loadtwin"
+version = "0.1.0"
+description = "Discrete-event digital twin for capacity planning: calibrate from one load test, simulate the target with SimPy, get a verdict."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [{ name = "adryanra97" }]
+keywords = ["capacity-planning", "digital-twin", "simpy", "discrete-event-simulation", "performance", "sre"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Framework :: FastAPI",
+  "Topic :: System :: Benchmark",
+]
+# Keep in sync with requirements.txt (tests/test_packaging.py checks it). Vercel may read either file.
+dependencies = [
+  "fastapi==0.162.0",
+  "pydantic==2.13.5",
+  "simpy==4.1.2",
+  "uvicorn==0.54.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==9.1.1", "httpx==0.28.1", "ruff==0.17.4"]
+
+[project.scripts]
+loadtwin = "loadtwin.cli:main"
+
+[project.urls]
+Repository = "https://github.com/adryanra97/loadtwin"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["loadtwin"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "D"]
+ignore = ["D105", "D107", "S311"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "D"]
+"api/index.py" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
