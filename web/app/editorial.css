@@ -18,6 +18,14 @@
   color:var(--ed-ink);
   background:var(--ed-paper);
 }
+/* Keep the public editorial sections and their demo readable under OS dark mode.
+   The simulation workspace itself continues to honor existing color-scheme support. */
+.ed-home {
+  --surface:#ffffff; --surface-2:#edf3f6; --ink:#102d41;
+  --ink-2:#476075; --muted:#5e7485; --line:#d7e3e8;
+  --line-strong:#b5cbd7; --accent:#205bba; --accent-ink:#ffffff;
+  --focus:#1763aa; color-scheme:light;
+}
 .ed-home h1,.ed-home h2,.ed-home h3 {text-wrap:balance}
 .ed-home a {text-decoration:none}
 .ed-container {width:min(1392px,calc(100% - 120px));margin-inline:auto}
@@ -44,9 +52,9 @@ body:has(.ed-home) .lt-engine-status {color:#c0d5e5}
 body:has(.ed-home) .lt-engine-status i.is-up {background:#6dd3b8}
 body:has(.ed-home) .lt-header-cta {background:#eaf7fe;color:#0c2643!important;border-radius:0;min-height:41px;padding:10px 17px;font-weight:750}
 body:has(.ed-home) .lt-header-cta:hover{background:#bbecfa}
-body:has(.ed-home) .lt-nav-dropdown{background:#fff;color:#152943}
+body:has(.ed-home) .lt-nav-dropdown{background:#fff;color:#152943;--surface:#fff;--surface-2:#edf3f6;--ink:#152943;--ink-2:#52687a;--muted:#63798a;--accent:#2455a6;--accent-soft:#e8f0fb}
 body:has(.ed-home) .lt-mobile-nav>summary{background:transparent;border-color:#7596a8;color:#fff}
-body:has(.ed-home) .lt-mobile-nav>nav{background:#fff}
+body:has(.ed-home) .lt-mobile-nav>nav{background:#fff;--surface:#fff;--surface-2:#edf3f6;--ink:#152943;--ink-2:#52687a;--accent:#2455a6;--accent-soft:#e8f0fb}
 body:has(.ed-home) .lt-mobile-nav>nav a {color:#142943}
 body:has(.ed-home) .lt-mobile-nav>nav a[aria-current=page] {color:#1645a8}
 
