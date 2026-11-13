@@ -1,4 +1,5 @@
 "use client";
+import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -123,13 +124,7 @@ export default function AskPage() {
 
   return (
     <div>
-      <div className="page-head">
-        <h1>Ask</h1>
-        <p className="lede">
-          Ask a what-if question in plain words. LoadTwin turns it into a scenario, runs the SimPy simulation and explains the
-          result. Every number in the answer comes from that simulation.
-        </p>
-      </div>
+      <ToolPageIntro category="SCENARIO EXPLORATION" title="Ask" description="Ask a what-if question in plain words. LoadTwin turns it into a scenario, runs the SimPy simulation and explains the result. Every number in the answer comes from that simulation." />
       <div className="tool">
         <aside className="stack">
           <ServiceStrip />

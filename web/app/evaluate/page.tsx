@@ -1,4 +1,5 @@
 "use client";
+import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import Link from "next/link";
 import { EvaluateResults } from "@/components/evaluate-results";
@@ -74,10 +75,7 @@ export default function EvaluatePage() {
 
   return (
     <div>
-      <div className="page-head">
-        <h1>Evaluate</h1>
-        <p className="lede">Check whether the target setup meets the SLA at normal and peak load, and how close it is to breaking.</p>
-      </div>
+      <ToolPageIntro category="CAPACITY ASSESSMENT" title="Evaluate" description="Check whether the target setup meets the SLA at normal and peak load, and how close it is to breaking." />
       <div className="tool">
         <aside className="stack">
           <ServiceStrip />

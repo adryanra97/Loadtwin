@@ -1,0 +1,356 @@
+/*
+ * LoadTwin Experience System
+ * One deliberate visual system for every route:
+ * marketing = editorial expression; application = quiet, data-first workspace.
+ * All share the same brand, typography, navigation, component states and color tokens.
+ */
+
+/* The application is intentionally a consistent light workspace regardless of OS setting.
+   Dark is reserved for the brand header and editorial dark sections. */
+:root,
+:root:not([data-theme="light"]) {
+  color-scheme: light;
+  --page: #f8f9fa;
+  --surface: #ffffff;
+  --surface-2: #f1f5f7;
+  --ink: #132d41;
+  --ink-2: #465c6e;
+  --muted: #5f7483;
+  --line: #dce5e9;
+  --line-strong: #b9cbd5;
+  --ring: rgba(12,43,67,.07);
+  --accent: #164f78;
+  --accent-ink: #fff;
+  --accent-soft: #e8f2f6;
+  --focus: #136999;
+  --good: #16856c;
+  --good-ink: #14664f;
+  --good-bg: #e6f4ee;
+  --warn: #cf8538;
+  --warn-ink: #80500f;
+  --warn-bg: #fff5e6;
+  --bad: #c75246;
+  --bad-ink: #aa3e34;
+  --bad-bg: #fff0ed;
+  --series-1: #277bb4;
+  --series-2: #d47a4d;
+  --series-3: #32977f;
+  --radius: 4px;
+  --radius-sm: 3px;
+  --shadow: none;
+}
+body {background:var(--page);color:var(--ink);font-size:15px;line-height:1.62}
+html {scroll-padding-top:108px}
+main {min-width:0}
+:where(a,button,summary,input,textarea,select):focus-visible {outline:3px solid var(--focus);outline-offset:3px}
+:where(button,input,textarea,select) {font-family:var(--font)}
+:where(button,a,summary) {transition:background-color .16s ease,border-color .16s ease,color .16s ease}
+::selection{background:#a7dae8;color:#092638}
+
+/* A single header for Home, Service, every model tool and Workspace.
+   Previously Home was dark, Service was white, and tools changed with OS theme. */
+body .lt-header,
+body:has(.ed-home) .lt-header,
+body:has(.lt-service) .lt-header {
+  background:#061927;
+  border-bottom:1px solid rgba(195,231,242,.23);
+  backdrop-filter:none;
+  color:#f2f9fd;
+}
+body .lt-header-main,body:has(.ed-home) .lt-header-main {max-width:1492px;min-height:77px;padding-inline:clamp(19px,3.5vw,60px);gap:30px}
+body .lt-brand,body:has(.ed-home) .lt-brand {color:#f5fbff;font-weight:720}
+body .lt-primary-nav>a,
+body .lt-nav-more>summary,
+body:has(.ed-home) .lt-primary-nav>a,
+body:has(.ed-home) .lt-nav-more>summary {
+  color:#bbcedb;border-radius:0;background:transparent;
+  font-size:13px;font-weight:570;padding:12px 12px;
+}
+body .lt-primary-nav>a:hover,
+body .lt-nav-more>summary:hover,
+body .lt-primary-nav>a[aria-current=page],
+body .lt-nav-more>summary[aria-current=page],
+body:has(.ed-home) .lt-primary-nav>a:hover,
+body:has(.ed-home) .lt-nav-more>summary:hover,
+body:has(.ed-home) .lt-primary-nav>a[aria-current=page],
+body:has(.ed-home) .lt-nav-more>summary[aria-current=page] {
+  color:#fff;background:transparent;
+  text-decoration:underline;
+  text-decoration-color:#83d9e7;
+  text-decoration-thickness:2px;
+  text-underline-offset:11px;
+}
+body .lt-engine-status,body:has(.ed-home) .lt-engine-status{color:#bbd1dd}
+body .lt-engine-status i.is-up{background:#70ceb1}
+body .lt-header-cta,body:has(.ed-home) .lt-header-cta{
+  min-height:42px;background:#e5f5fb;color:#092a42!important;
+  border-radius:0;padding:10px 18px;font-weight:750;
+}
+body .lt-header-cta:hover,body:has(.ed-home) .lt-header-cta:hover {background:#bce5f3}
+body .lt-key-button{color:#e2f6ff;background:#12384f;border-color:#62889c;border-radius:2px}
+body .lt-key-button:hover{background:#24506a}
+body .lt-key-form {color:#e1f1f7}
+body .lt-key-form .label,body .lt-key-form .hint{color:#c4dae5}
+body .lt-key-form input{background:#fff;color:#153047}
+body .lt-key-form .btn-primary{color:#09263e;background:#e7f6ff;border-color:#e7f6ff}
+body .lt-nav-dropdown,
+body:has(.ed-home) .lt-nav-dropdown,
+body .lt-mobile-nav>nav,
+body:has(.ed-home) .lt-mobile-nav>nav{
+  --surface:#fff;--surface-2:#edf3f6;--ink:#142b3e;
+  --ink-2:#3d596c;--muted:#61798a;--accent:#164f78;--accent-soft:#e8f2f6;
+  background:#fff;color:#153249;border-color:#d1e1e9;border-radius:4px;
+  box-shadow:0 17px 45px rgba(0,17,34,.22);
+}
+body .lt-nav-dropdown a,body .lt-mobile-nav>nav a{color:#345368}
+body .lt-nav-dropdown>a[aria-current=page],body .lt-nav-dropdown>a:hover,
+body .lt-mobile-nav>nav a[aria-current=page],body .lt-mobile-nav>nav a:hover{color:#123f60;background:#e8f2f6}
+body .lt-mobile-nav>summary,body:has(.ed-home) .lt-mobile-nav>summary{background:transparent;border-color:#789baa;color:#e3f5ff;border-radius:2px}
+body .lt-mobile-nav>summary:hover{background:#15364e}
+
+/* Single canvas width and spacing rhythm for every non-marketing page */
+main:not(:has(.lt-home)):not(:has(.lt-service)){
+  max-width:1376px;
+  padding:51px clamp(22px,3.3vw,48px) 92px;
+  margin-inline:auto;
+}
+body:has(.lt-service) main:has(.lt-service){
+  max-width:1376px;
+  padding:51px clamp(22px,3.3vw,48px) 82px;
+}
+body:has(.ed-home) main:has(.lt-home){padding:0}
+body footer,body:has(.ed-home) footer {
+  max-width:none;background:#061927;color:#acc6d4;
+  border-top:1px solid rgba(185,219,235,.22);
+  padding:29px max(22px,calc((100vw - 1310px)/2));
+  font-size:12px;line-height:1.8;
+}
+body .skip:focus {top:9px;z-index:100;background:#d7f2fc;color:#0e3045}
+
+/* The same component sets the title, breadcrumb, label and lede of each tool. */
+.xp-page-intro {
+  display:grid;gap:26px;padding:0 0 38px;margin:0 0 36px;
+  border-bottom:1px solid #c9d8df;
+}
+.xp-breadcrumb,.lt-service-breadcrumb{
+  display:flex;align-items:center;gap:11px;font-size:12px;color:#71889a;
+  line-height:1.5;margin:0;
+}
+.xp-breadcrumb a,.lt-service-breadcrumb a{color:#365f7c;text-decoration:none}
+.xp-breadcrumb a:hover,.lt-service-breadcrumb a:hover{text-decoration:underline}
+.xp-breadcrumb span:last-child,.lt-service-breadcrumb span:last-child{font-weight:680;color:#34546b}
+.xp-page-heading{max-width:980px}
+.xp-eyebrow,body:has(.lt-service) .lt-service-head-row .lt-overline {
+  display:block;font-size:11px;letter-spacing:.17em;font-weight:750;color:#3b718e;
+  text-transform:uppercase;line-height:1.5;
+}
+.xp-page-heading h1,.page-head h1,
+body:has(.lt-service) .lt-service-head-row h1{
+  font:680 clamp(43px,4.45vw,65px)/1.08 var(--display);
+  letter-spacing:-.056em;margin:14px 0 18px;color:#0a2a41;
+}
+.xp-page-heading>p,.page-head>.lede,body:has(.lt-service) .lt-service-head-row p{
+  color:#526a7b;font-size:16px;line-height:1.75;max-width:790px;
+}
+.page-head{padding:0 0 33px;border-bottom:1px solid #c9d8df;margin-bottom:33px}
+body:has(.lt-service) .lt-service-header{border-bottom:1px solid #c9d8df;padding-bottom:37px;margin-bottom:0}
+body:has(.lt-service) .lt-service-head-row h1{max-width:980px}
+body:has(.lt-service) .lt-service-breadcrumb{margin-bottom:27px}
+body:has(.lt-service) .lt-service-assurance{padding-top:10px;margin-top:14px}
+
+/* Service context is one reusable, readable anchor across all tools. */
+.xp-service-context{
+  border:1px solid #d3e0e5;background:#edf3f6;
+  padding:22px 23px;min-width:0;display:grid;gap:19px;
+}
+.xp-service-context-header{display:flex;align-items:start;justify-content:space-between;gap:12px}
+.xp-service-context-header>div{display:grid;gap:5px;min-width:0}
+.xp-service-context-label{font-size:10px;letter-spacing:.14em;color:#52758b;font-weight:800}
+.xp-service-context-header strong{font:680 20px/1.23 var(--display);letter-spacing:-.03em;color:#102f46;overflow-wrap:anywhere}
+.xp-service-edit{font-size:12px;color:#1a597d;font-weight:750;text-decoration:none;white-space:nowrap;border-bottom:1px solid #87adbc;padding-bottom:4px}
+.xp-service-edit:hover{color:#063950}
+.xp-service-context-details{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;margin:0}
+.xp-service-context-details dt{font-size:10px;font-weight:750;letter-spacing:.07em;color:#6b8696;margin-top:11px;text-transform:uppercase}
+.xp-service-context-details dt:first-child{margin-top:0}
+.xp-service-context-details dd{font-size:12px;line-height:1.58;color:#2a475a;margin:3px 0 0;font-variant-numeric:tabular-nums}
+
+/* Workspaces share one two-column split, panel system, results and inputs. */
+.tool{display:grid;grid-template-columns:minmax(290px,355px) minmax(0,1fr);gap:32px;align-items:start}
+/* Data-import tools such as Validate need two genuinely wide columns; don't
+   squeeze editable data tables into the narrow control rail. */
+.tool.tool-even{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tool>aside{top:106px}
+.tool>aside.stack{gap:16px}
+.tool>section.stack{gap:18px;min-width:0}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .card{
+  border-radius:3px;box-shadow:none;border-color:#d6e2e7;
+  background:#fff;padding:26px;
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .card-head{margin-bottom:21px}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .card h2{
+  font-size:20px;line-height:1.22;letter-spacing:-.032em;font-weight:700;
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .card h3{font-size:17px;font-weight:700}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .card fieldset>legend{
+  font-size:13px;font-weight:760;letter-spacing:-.012em;margin-bottom:15px;color:#173b56
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .section-title{
+  font:760 11px var(--font);color:#56748a;letter-spacing:.12em;text-transform:uppercase;
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .hint{font-size:12px;color:#667b89;line-height:1.6}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .stat{
+  padding:19px;border-radius:2px;box-shadow:none;background:#f7f9fa;
+  border-color:#d8e4e9;
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .stat .v{color:#0e3855;font-weight:730}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .chart{
+  border-radius:2px;border-color:#d8e4e9;background:#fff;
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .chart .grid line{stroke:#dce6ea}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .chart .axis text{fill:#688092}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .verdict{
+  border-radius:2px;box-shadow:none;
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .notice{border-radius:2px}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .table-wrap{
+  overflow:auto;border-radius:2px;border-color:#d8e4e9;max-width:100%;
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) table{
+  font-size:13px;font-variant-numeric:tabular-nums
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) thead th{
+  background:#edf3f6;color:#33566e;font-weight:750;white-space:nowrap
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) tbody td{color:#2f4758}
+main:not(:has(.lt-home)):not(:has(.lt-service)) tbody tr:hover td{background:#f3f7f9}
+
+/* Form controls: shared shape, height, color and focus across all routes. */
+.btn,.btn-sm,.lt-service-savebar .btn,body:has(.lt-service) .lt-service-savebar .btn{
+  border-radius:2px;font-weight:720;
+}
+.btn:not(.btn-sm){min-height:44px}
+.btn-primary,body:has(.lt-service) .lt-service-savebar .btn-primary{
+  background:#17435f;border-color:#17435f;color:#fff;
+}
+.btn-primary:hover:not(:disabled),body:has(.lt-service) .lt-service-savebar .btn-primary:hover:not(:disabled){
+  background:#0d334e;border-color:#0d334e;color:#fff;
+}
+.btn-ghost{color:#185a7f}
+.input-wrap,body:has(.lt-service) .lt-service-card .input-wrap,
+input[type=text].plain,textarea.plain,
+body:has(.lt-service) .lt-service-name-field input{
+  border-radius:2px;border-color:#b7cbd5;
+}
+.input-wrap input,.input-wrap select,input[type=text].plain,textarea.plain{
+  min-height:45px;background:#fff;color:#1a3547;
+}
+.field label,.label,body:has(.lt-service) .lt-service-card .field label{
+  font-size:13px;font-weight:700;color:#29495d;
+}
+.input-wrap:focus-within{border-color:#2379a1;box-shadow:0 0 0 3px rgba(64,142,179,.14)}
+.segmented{border-radius:2px;background:#edf3f6}
+.segmented label,.segmented label:has(input:checked){border-radius:2px}
+.segmented label:has(input:checked){color:#0f415f;box-shadow:0 1px 4px #102a4124}
+.stage,.stage-speed,.live-dock,.knob-btn,.toggle,.tool-card,.dropzone{
+  border-radius:3px
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .grid-2{gap:14px 18px}
+
+/* Service setup has the same typographic and surface system, with more room for the long form. */
+body:has(.lt-service) .lt-service-layout{gap:36px}
+body:has(.lt-service) .lt-service-content{border-color:#d4e1e7}
+body:has(.lt-service) .lt-service-card{border-bottom-color:#dce5e9}
+body:has(.lt-service) .lt-service-section-title h2{font:700 25px/1.23 var(--display);color:#13344b}
+body:has(.lt-service) .lt-service-rail>nav>a{color:#446477;font-weight:650}
+body:has(.lt-service) .lt-service-rail>nav>a:hover{color:#0b5177}
+body:has(.lt-service) .lt-service-savebar{border-color:#bdcfd9;box-shadow:0 8px 34px rgba(2,31,49,.13)}
+body:has(.lt-service) .lt-service-save-status strong{color:#18364a}
+body:has(.lt-service) .lt-service-save-status small{color:#5c7484}
+body:has(.lt-service) .lt-service-preview>summary{color:#1a5c80}
+
+/* Keep plain white interior and warm visuals legible on user dark-mode systems. */
+body:has(.lt-service) .lt-service-card,
+body:has(.lt-service) .lt-service-content,
+main:not(:has(.lt-home)):not(:has(.lt-service)) .card{
+  color:#163548;
+}
+main:not(:has(.lt-home)):not(:has(.lt-service)) .card .muted,
+main:not(:has(.lt-home)):not(:has(.lt-service)) .card .small.muted{color:#617b8e}
+
+/* Reports and saved-scenario comparisons are part of the same workspace.
+   Preserve print semantics while matching typography, tables and controls. */
+main .report{max-width:none;min-width:0}
+main .report>.spread:first-child{gap:16px;margin-bottom:9px}
+main .report>.spread:first-child>a{font-weight:700;color:#255d7b;text-decoration:none;border-bottom:1px solid #9dbdcc;padding-bottom:5px}
+main .report>.spread:first-child>a:hover{color:#0b3e60}
+main .report .report-head{
+  background:transparent;padding:27px 0 31px;
+  border-bottom:1px solid #c9d8df;margin-bottom:24px;
+}
+main .report .report-kicker{
+  font:750 11px/1.5 var(--font);letter-spacing:.16em;text-transform:uppercase;
+  color:#39708b;margin-bottom:13px;
+}
+main .report .report-head h1{
+  font:680 clamp(38px,4vw,61px)/1.13 var(--display);letter-spacing:-.053em;color:#103148;
+}
+main .report .report-head h1 .muted{color:#728a9a}
+main .report .card{border-radius:2px;box-shadow:none}
+main .report .card h2{font-size:20px;font-weight:700;color:#18384e}
+main .report .table-wrap{border-radius:2px}
+main .report :is(.compare-heads,.report-inputs){gap:18px}
+main .report .empty{border:1px solid #dce6ea}
+main .report .stage{border-color:#d7e3e9}
+main .report .badge{border-radius:2px}
+
+/* Consistent visual meaning: action blue, good green, caution amber, error red. */
+main:not(:has(.lt-home)) .badge,
+main:not(:has(.lt-home)) .chip-static{border-radius:2px}
+main:not(:has(.lt-home)) .progress{border-radius:2px}
+main:not(:has(.lt-home)) .runbar,
+main:not(:has(.lt-home)) .run-bar{border-radius:2px}
+main:not(:has(.lt-home)) .live-dock{background:#eff4f6;border-color:#d4e2e8}
+main:not(:has(.lt-home)) .stage-readout{background:#fff;border-color:#d4e2e8}
+main:not(:has(.lt-home)) .stage-readout dt{color:#5c7889}
+main:not(:has(.lt-home)) .stage-readout dd{color:#1b425d;font-variant-numeric:tabular-nums}
+main:not(:has(.lt-home)) .stage-head{border-color:#d7e4e8}
+main:not(:has(.lt-home)) .stage-title{font-weight:750}
+main:not(:has(.lt-home)) .stage-speed{border-radius:2px}
+main:not(:has(.lt-home)) .dropzone{border-color:#a8c4d1}
+main:not(:has(.lt-home)) .dropzone:hover{border-color:#25739b}
+
+/* Explicit responsive rhythm, not compressed desktop canvases. */
+@media(max-width:1050px){
+ body .lt-primary-nav{display:none}
+ body .lt-mobile-nav{display:block}
+ body .lt-header-cta{display:none}
+ body .lt-header-main{min-height:69px;gap:15px}
+ .tool,.tool.tool-even{grid-template-columns:1fr;gap:22px}
+ .tool>aside{position:static}
+ .tool>aside.stack{display:grid;grid-template-columns:1fr;gap:13px}
+}
+@media(max-width:750px){
+ main:not(:has(.lt-home)):not(:has(.lt-service)){padding:29px 16px 68px}
+ body:has(.lt-service) main:has(.lt-service){padding:29px 16px 68px}
+ .xp-page-intro{gap:18px;padding-bottom:27px;margin-bottom:27px}
+ .xp-page-heading h1,.page-head h1,body:has(.lt-service) .lt-service-head-row h1{font-size:clamp(39px,8.5vw,51px);margin:11px 0 15px}
+ .xp-page-heading>p,.page-head>.lede,body:has(.lt-service) .lt-service-head-row p{font-size:14px;line-height:1.7}
+ .tool>aside.stack{display:grid}
+ .xp-service-context{padding:19px}
+ main:not(:has(.lt-home)):not(:has(.lt-service)) .card{padding:20px}
+ body:has(.lt-service) .lt-service-card{padding:29px 19px}
+ body:has(.lt-service) .lt-service-section-title h2{font-size:22px}
+ body .lt-header-main,body:has(.ed-home) .lt-header-main{padding-inline:16px}
+ body footer,body:has(.ed-home) footer{padding:23px 19px}
+}
+@media(max-width:450px){
+ .xp-page-heading h1,.page-head h1,body:has(.lt-service) .lt-service-head-row h1{font-size:39px}
+ .xp-service-context-header{flex-wrap:wrap}
+ .lt-service-savebar{bottom:8px}
+ main:not(:has(.lt-home)):not(:has(.lt-service)) .card{padding:16px}
+ body .lt-engine-status span{display:none}
+}
+@media(prefers-reduced-motion:reduce) {
+ html{scroll-behavior:auto}
+ :where(button,a,summary){transition:none!important}
+}

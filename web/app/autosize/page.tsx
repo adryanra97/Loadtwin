@@ -1,4 +1,5 @@
 "use client";
+import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import { BarList } from "@/components/charts";
 import { Trash } from "@/components/icons";
@@ -94,13 +95,7 @@ export default function AutosizePage() {
 
   return (
     <div>
-      <div className="page-head">
-        <h1>Auto-size</h1>
-        <p className="lede">
-          Find the cheapest cluster that meets your SLA at peak load. For each machine type, the twin searches for the fewest nodes
-          that pass, then prices them.
-        </p>
-      </div>
+      <ToolPageIntro category="INFRASTRUCTURE PLANNING" title="Auto-size" description="Find the cheapest cluster that meets your SLA at peak load. For each machine type, the twin searches for the fewest nodes that pass, then prices them." />
       <div className="tool">
         <aside className="stack">
           <ServiceStrip show={["measured", "sla"]} />

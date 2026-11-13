@@ -1,4 +1,5 @@
 "use client";
+import { ToolPageIntro } from "@/components/tool-page-intro";
 
 import { RunBar, useRun } from "@/components/run";
 import { SensitivityStage } from "@/components/option-stages";
@@ -35,13 +36,7 @@ export default function SensitivityPage() {
 
   return (
     <div>
-      <div className="page-head">
-        <h1>Sensitivity</h1>
-        <p className="lede">
-          Which setting moves p95 the most? Each input is turned down and up by the same amount while everything else stays put,
-          so you know what to change first.
-        </p>
-      </div>
+      <ToolPageIntro category="MODEL SENSITIVITY" title="Sensitivity" description="Which setting moves p95 the most? Each input is turned down and up by the same amount while everything else stays put, so you know what to change first." />
       <div className="tool">
         <aside className="stack">
           <ServiceStrip />
