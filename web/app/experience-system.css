@@ -274,6 +274,48 @@ main:not(:has(.lt-home)):not(:has(.lt-service)) .card{
 main:not(:has(.lt-home)):not(:has(.lt-service)) .card .muted,
 main:not(:has(.lt-home)):not(:has(.lt-service)) .card .small.muted{color:#617b8e}
 
+/* Reports and saved-scenario comparisons are part of the same workspace.
+   Preserve print semantics while matching typography, tables and controls. */
+main .report{max-width:none;min-width:0}
+main .report>.spread:first-child{gap:16px;margin-bottom:9px}
+main .report>.spread:first-child>a{font-weight:700;color:#255d7b;text-decoration:none;border-bottom:1px solid #9dbdcc;padding-bottom:5px}
+main .report>.spread:first-child>a:hover{color:#0b3e60}
+main .report .report-head{
+  background:transparent;padding:27px 0 31px;
+  border-bottom:1px solid #c9d8df;margin-bottom:24px;
+}
+main .report .report-kicker{
+  font:750 11px/1.5 var(--font);letter-spacing:.16em;text-transform:uppercase;
+  color:#39708b;margin-bottom:13px;
+}
+main .report .report-head h1{
+  font:680 clamp(38px,4vw,61px)/1.13 var(--display);letter-spacing:-.053em;color:#103148;
+}
+main .report .report-head h1 .muted{color:#728a9a}
+main .report .card{border-radius:2px;box-shadow:none}
+main .report .card h2{font-size:20px;font-weight:700;color:#18384e}
+main .report .table-wrap{border-radius:2px}
+main .report :is(.compare-heads,.report-inputs){gap:18px}
+main .report .empty{border:1px solid #dce6ea}
+main .report .stage{border-color:#d7e3e9}
+main .report .badge{border-radius:2px}
+
+/* Consistent visual meaning: action blue, good green, caution amber, error red. */
+main:not(:has(.lt-home)) .badge,
+main:not(:has(.lt-home)) .chip-static{border-radius:2px}
+main:not(:has(.lt-home)) .progress{border-radius:2px}
+main:not(:has(.lt-home)) .runbar,
+main:not(:has(.lt-home)) .run-bar{border-radius:2px}
+main:not(:has(.lt-home)) .live-dock{background:#eff4f6;border-color:#d4e2e8}
+main:not(:has(.lt-home)) .stage-readout{background:#fff;border-color:#d4e2e8}
+main:not(:has(.lt-home)) .stage-readout dt{color:#5c7889}
+main:not(:has(.lt-home)) .stage-readout dd{color:#1b425d;font-variant-numeric:tabular-nums}
+main:not(:has(.lt-home)) .stage-head{border-color:#d7e4e8}
+main:not(:has(.lt-home)) .stage-title{font-weight:750}
+main:not(:has(.lt-home)) .stage-speed{border-radius:2px}
+main:not(:has(.lt-home)) .dropzone{border-color:#a8c4d1}
+main:not(:has(.lt-home)) .dropzone:hover{border-color:#25739b}
+
 /* Explicit responsive rhythm, not compressed desktop canvases. */
 @media(max-width:1050px){
  body .lt-primary-nav{display:none}
