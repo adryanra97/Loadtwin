@@ -91,7 +91,7 @@ export function RunBar({
 }) {
   const share = Math.min(elapsed / Math.max(estimateS, 0.5), 0.95);
   return (
-    <div className="stack-sm">
+    <div className="stack-sm run-bar">
       {running ? (
         <div className="row" style={{ flexWrap: "nowrap" }}>
           <button type="button" className="btn btn-primary" style={{ flex: 1 }} disabled aria-disabled>

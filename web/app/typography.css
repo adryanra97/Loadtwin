@@ -429,3 +429,102 @@ body main:not(:has(.lt-home)):not(:has(.lt-service)) .card .muted {
 .ed-tool-gives {
   color: #4f6573;
 }
+
+/* ---------- Laptop screens (wide but short): keep the important part on the first screen ---------- */
+@media (min-width: 1001px) and (max-height: 940px) {
+  .ed-hero-shell {
+    padding: clamp(32px, 6vh, 72px) 0 clamp(28px, 5vh, 56px);
+  }
+  .ed-hero-copy h1 {
+    font-size: clamp(46px, min(5.4vw, 9vh), 88px);
+    margin: 20px 0 18px;
+  }
+  .ed-hero-lede {
+    font-size: 17px;
+    line-height: 1.65;
+  }
+  .ed-hero-cta {
+    margin-top: 26px;
+  }
+  .ed-hero-annotation {
+    margin-top: 18px;
+  }
+  .ed-architecture-modes button {
+    min-height: 46px;
+  }
+  .ed-architecture-graphic {
+    max-height: min(365px, 33vh);
+  }
+  .ed-hero-bottom {
+    padding: 14px 0 18px;
+  }
+  /* Tool pages: shorter intro so the form and the first result are visible */
+  .xp-page-intro {
+    gap: 14px;
+    padding-bottom: 22px;
+    margin-bottom: 24px;
+  }
+  .xp-page-heading h1,
+  .page-head h1,
+  body:has(.lt-service) .lt-service-head-row h1 {
+    font-size: clamp(34px, min(3vw, 6vh), 46px);
+    margin: 8px 0 10px;
+  }
+  .xp-page-heading > p,
+  .page-head > .lede,
+  body:has(.lt-service) .lt-service-head-row p {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .page-head {
+    padding-bottom: 22px;
+    margin-bottom: 24px;
+  }
+  body:has(.lt-service) .lt-service-header {
+    padding-bottom: 24px;
+  }
+  body:has(.lt-service) .lt-service-breadcrumb {
+    margin-bottom: 16px;
+  }
+  /* Service summary beside each tool: label and value on one line */
+  .xp-service-context {
+    padding: 16px 18px;
+  }
+  .xp-service-context-details {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 6px 12px;
+    margin-top: 10px;
+  }
+  .xp-service-context-details dt,
+  .xp-service-context-details dt:first-child {
+    margin-top: 1px;
+  }
+  .xp-service-context-details dd {
+    margin: 0;
+  }
+  .live .stage-canvas,
+  .stage .stage-canvas {
+    height: min(240px, 27vh) !important;
+  }
+}
+
+/*
+ * Tool sidebars are taller than a laptop screen. A sticky sidebar that tall hides its own bottom,
+ * the Run button included, until the end of the page. Let the sidebar scroll with the page and keep
+ * the Run button pinned to the bottom of the screen while its form is visible.
+ */
+body .tool > aside {
+  position: static;
+}
+@media (min-width: 961px) {
+  .tool > aside form .run-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin: 0 -20px -20px;
+    padding: 14px 20px 16px;
+    background: #fff;
+    border-top: 1px solid #d4dce0;
+    box-shadow: 0 -10px 20px -14px rgba(10, 42, 65, 0.35);
+  }
+}
