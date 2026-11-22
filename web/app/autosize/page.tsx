@@ -246,6 +246,7 @@ function Results({ res, stale, sla }: { res: AutosizeResult; stale: boolean; sla
   const fits = res.options.filter((o) => o.fits);
   return (
     <div className="stack" style={{ opacity: stale ? 0.55 : 1, transition: "opacity .2s" }}>
+      {res.headline && <h2 className="action-title">{res.headline}</h2>}
       {rec ? (
         <section className="verdict tone-good" aria-label="Recommendation">
           <span className="icon" aria-hidden>

@@ -70,7 +70,7 @@ export function Header() {
             <span>{engine.state === "up" ? "Engine online" : engine.state === "down" ? "Engine offline" : "Connecting…"}</span>
           </span>
           {engine.state === "up" && engine.auth && <button type="button" className="lt-key-button" aria-expanded={keyOpen} aria-controls="lt-api-key-panel" onClick={() => setKeyOpen((v) => !v)}>API key{key ? " ✓" : ""}</button>}
-          <Link href="/evaluate/" className="lt-header-cta">Run evaluation <span aria-hidden="true">↗</span></Link>
+          <Link href="/evaluate/" className="lt-header-cta">Run an evaluation <span aria-hidden="true">→</span></Link>
           <details className="lt-mobile-nav">
             <summary>Menu <span aria-hidden="true">☰</span></summary>
             <nav aria-label="Mobile navigation">
@@ -103,7 +103,7 @@ export function ServiceStrip({ show = ["measured", "target", "sla"] }: { show?: 
           <span className="xp-service-context-label">CURRENT SERVICE</span>
           <strong>{svc.name}</strong>
         </div>
-        <Link href="/service/" className="xp-service-edit">Edit setup <span aria-hidden="true">↗</span></Link>
+        <Link href="/service/" className="xp-service-edit">Edit setup <span aria-hidden="true">→</span></Link>
       </div>
       <dl className="xp-service-context-details">
         {show.includes("measured") && (

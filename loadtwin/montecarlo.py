@@ -108,5 +108,5 @@ def apply_breach_probability(verdict: str, mc: dict, reasons: list[str], conditi
         reasons.insert(0, f"The SLA breaks in {share} at peak: random variation alone can push it over the limit.")
         conditions.append("Add headroom (more nodes or larger machines) to bring the breach probability under 5%.")
         return PASS_WITH_CONDITIONS
-    reasons.append(f"Monte Carlo: the SLA breaks in {share} at peak.")
+    reasons.append(f"Run {mc['runs']} times with different random seeds, the peak breaks the SLA in {p:.0%} of runs.")
     return verdict

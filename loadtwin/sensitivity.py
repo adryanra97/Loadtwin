@@ -21,6 +21,7 @@ from dataclasses import replace
 
 from loadtwin.calibration import Database, Measurement, prepare
 from loadtwin.engine import Spec, seed_from, simulate
+from loadtwin.headlines import sensitivity_headline
 from loadtwin.sla import SLA, violations
 
 STEP = 0.25
@@ -149,6 +150,7 @@ def sensitivity(
         joined = flat[0] if len(flat) == 1 else ", ".join(flat[:-1]) + " or " + flat[-1]
         advice.append(f"Changing {joined} barely moves p95 at this load.")
     return {
+        "headline": sensitivity_headline(rows, baseline["p95Ms"]),
         "peakTps": peak_tps,
         "step": step,
         "baseline": baseline,

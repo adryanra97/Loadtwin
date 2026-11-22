@@ -21,6 +21,7 @@ import math
 from dataclasses import replace
 
 from loadtwin.engine import BUCKET_S, Fault, Profile, Spec, percentile, simulate
+from loadtwin.headlines import fault_headline
 from loadtwin.sla import FAIL, PASS, PASS_WITH_CONDITIONS, SLA
 
 BEFORE_S = 20.0
@@ -181,6 +182,7 @@ def run_fault(spec: Spec, profile: Profile, tps: float, fault: Fault, sla: SLA, 
         )
     return {
         "verdict": verdict,
+        "headline": fault_headline(verdict, desc, phases["during"], phases["healthyDuring"], recovery),
         "reasons": reasons,
         "failure": {
             "description": desc,

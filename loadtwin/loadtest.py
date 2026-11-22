@@ -23,6 +23,7 @@ from dataclasses import dataclass, replace
 
 from loadtwin.calibration import Database, Measurement, calibrate
 from loadtwin.engine import Spec, percentile, seed_from, simulate
+from loadtwin.headlines import validate_headline
 
 WINDOW_S = 30.0
 STEP_TOLERANCE = 0.15
@@ -320,9 +321,10 @@ def validate(
         reasons.append(f"Predicted p95 is off by {mae}% on average across {len(errors)} independent points ({grade}).")
         worst = max((r for r in rows if not r["calibration"]), key=lambda r: r["p95ErrorPct"])
         reasons.append(
-            f"Largest gap at {worst['tps']:g} TPS: predicted {worst['predictedP95Ms']} ms, measured {worst['p95Ms']} ms."
+            f"Largest gap at {worst['tps']:g} req/s: predicted {worst['predictedP95Ms']} ms, measured {worst['p95Ms']} ms."
         )
     return {
+        "headline": validate_headline(grade, mae, valid_range),
         "calibrationIndex": calibration_index,
         "calibration": cal,
         "points": rows,

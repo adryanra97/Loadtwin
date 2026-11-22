@@ -143,14 +143,26 @@ export function VerdictBanner({
   verdict,
   title,
   plain,
+  headline,
   children,
 }: {
   verdict: Verdict;
   title?: string;
   plain?: string;
+  /** The answer in one sentence; when given it leads, and the verdict becomes its label. */
+  headline?: string;
   children?: ReactNode;
 }) {
   const v = VERDICT[verdict];
+  if (headline)
+    return (
+      <section className={`verdict verdict-headline tone-${v.tone}`} aria-label="Verdict">
+        <span className="icon">{v.icon}</span>
+        <p className="verdict-kicker">{title ?? v.label}</p>
+        <h2>{headline}</h2>
+        {children && <div className="stack-sm verdict-support">{children}</div>}
+      </section>
+    );
   return (
     <section className={`verdict tone-${v.tone}`} aria-label="Verdict">
       <span className="icon">{v.icon}</span>

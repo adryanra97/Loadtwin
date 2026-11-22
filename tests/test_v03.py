@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from loadtwin import SLA, Database, Measurement, Spec
+from loadtwin import SLA, Database, Load, Measurement, Spec, evaluate
 from loadtwin import assistant as A
 from loadtwin.calibration import prepare
 from loadtwin.engine import Fault, simulate
@@ -125,3 +125,14 @@ def test_ask_llm_failure_falls_back(monkeypatch):
     monkeypatch.setattr(A, "_call_llm", boom)
     r = A.ask("2 node mati", MEASURED, M, TARGET, 8, 45, SLA(), DB)
     assert r["planSource"] == "rules" and r["tool"] == "fault" and r["notes"]
+
+
+def test_every_result_leads_with_a_headline(profile):
+    r = evaluate(MEASURED, M, TARGET, Load(8, 45, [1.5]), SLA(), DB, seed=3)
+    assert r["headline"].startswith("Holds the 45 req/s peak") and "CPU" in r["headline"]
+    bad = evaluate(MEASURED, M, TARGET, Load(8, 120, [1.5]), SLA(), DB, seed=3)
+    assert bad["headline"].startswith("Breaks at the 120 req/s peak")
+    f = run_fault(TARGET, profile, 45, Fault(0, 40, nodes_down=2), SLA(), 3)
+    assert f["headline"].startswith("Does not survive when 2 of 3 nodes crash")
+    s = sensitivity(MEASURED, M, TARGET, 70, SLA(), DB, params=["nodes", "cpuMs"])
+    assert s["headline"].startswith("The number of nodes moves p95 the most")

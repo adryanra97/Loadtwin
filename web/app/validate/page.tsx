@@ -14,6 +14,7 @@ import { ServiceStrip, useService } from "@/components/shell";
 import { Notice, Stat } from "@/components/ui";
 import { ApiError, post } from "@/lib/api";
 import { check, type FieldDef } from "@/lib/fields";
+import { validateChartTitle } from "@/lib/takeaways";
 import { num, pct } from "@/lib/format";
 import { KEYS, usePersistent } from "@/lib/store";
 import type { LoadPoint, Spec, ValidateResult } from "@/lib/types";
@@ -353,13 +354,20 @@ function Results({
   const pts = [...res.points].sort((a, b) => a.tps - b.tps);
   return (
     <div className="stack" style={{ opacity: stale ? 0.55 : 1, transition: "opacity .2s" }}>
-      <section className={`verdict tone-${g.tone}`} aria-label="Validation grade">
+      <section className={`verdict tone-${g.tone}${res.headline ? " verdict-headline" : ""}`} aria-label="Validation grade">
         <span className="icon" aria-hidden style={{ fontWeight: 700 }}>
           {g.label[0]}
         </span>
-        <h2>Model fit: {g.label}</h2>
+        {res.headline ? (
+          <>
+            <p className="verdict-kicker">Model fit: {g.label}</p>
+            <h2>{res.headline}</h2>
+          </>
+        ) : (
+          <h2>Model fit: {g.label}</h2>
+        )}
         <div className="stack-sm">
-          <p>{g.plain}</p>
+          {!res.headline && <p>{g.plain}</p>}
           <ul className="reasons">
             {res.reasons.map((x) => (
               <li key={x}>{x}</li>
@@ -390,7 +398,7 @@ function Results({
         <Stat k="Calibrated on" v={`${num(res.points[res.calibrationIndex].tps, 1)} req/s`} s={`Fit error ${pct(res.calibration.errorPct, 1)}`} />
       </div>
       <div className="card stack">
-        <h2>Measured vs predicted p95</h2>
+        <div className="chart-heading"><p className="chart-kicker">Measured vs predicted p95</p><h2>{validateChartTitle(res)}</h2></div>
         <LineChart
           label="Measured and predicted p95 by load level"
           yLabel="p95 (ms)"

@@ -12,6 +12,7 @@ import { ServiceStrip, useService } from "@/components/shell";
 import { NumberField, Segmented, Stat, VerdictBanner } from "@/components/ui";
 import { DEFAULT_PATTERN, LIMITS, patternSegments } from "@/lib/defaults";
 import { check, type FieldDef } from "@/lib/fields";
+import { cpuTitle, p95Title, patternLoadTitle } from "@/lib/takeaways";
 import { num, pct, seconds } from "@/lib/format";
 import { KEYS, usePersistent } from "@/lib/store";
 import type { PatternIn, PatternKind, PatternResult } from "@/lib/types";
@@ -287,7 +288,7 @@ function Results({
   const pts = (f: (w: PatternResult["windows"][number]) => number | null) => res.windows.map((w) => ({ x: w.t, y: f(w) }));
   return (
     <div className="stack" style={{ opacity: stale ? 0.55 : 1, transition: "opacity .2s" }}>
-      <VerdictBanner verdict={res.verdict}>
+      <VerdictBanner verdict={res.verdict} headline={res.headline}>
         <ul className="reasons">
           {res.reasons.map((x) => (
             <li key={x}>{x}</li>
@@ -323,7 +324,7 @@ function Results({
       </div>
       <div className="card stack">
         <div className="card-head">
-          <h2>Load: offered and served</h2>
+          <div className="chart-heading"><p className="chart-kicker">Load: offered and served</p><h2>{patternLoadTitle(res)}</h2></div>
           <span className="hint">10-second windows; shaded where the SLA breaks</span>
         </div>
         <LineChart
@@ -338,7 +339,7 @@ function Results({
         />
       </div>
       <div className="card stack">
-        <h2>p95 response time</h2>
+        <div className="chart-heading"><p className="chart-kicker">p95 response time</p><h2>{p95Title(res.windows.map((w) => w.p95Ms), sla.maxP95Ms)}</h2></div>
         <LineChart
           label="p95 response time per 10-second window"
           yLabel="p95 (ms)"
@@ -350,7 +351,7 @@ function Results({
         />
       </div>
       <div className="card stack">
-        <h2>CPU and worker threads</h2>
+        <div className="chart-heading"><p className="chart-kicker">CPU and worker threads</p><h2>{cpuTitle(res.windows.map((w) => w.cpuPct), sla.maxCpuPct)}</h2></div>
         <LineChart
           label="CPU and worker-thread utilization per window"
           yLabel="Utilization (%)"

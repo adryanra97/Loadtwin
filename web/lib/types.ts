@@ -98,6 +98,7 @@ export type Calibration = {
 };
 
 export type EvaluateResult = {
+  headline?: string;
   verdict: Verdict;
   reasons: string[];
   conditions: string[];
@@ -127,6 +128,7 @@ export type SizedConfig = {
 };
 
 export type AutosizeResult = {
+  headline?: string;
   peakTps: number;
   options: {
     machine: MachineType;
@@ -168,6 +170,7 @@ export type PatternWindow = {
 };
 
 export type PatternResult = {
+  headline?: string;
   verdict: Verdict;
   reasons: string[];
   segments: { durationS: number; tps: number }[];
@@ -189,6 +192,7 @@ export type LoadPoint = {
 };
 
 export type ValidateResult = {
+  headline?: string;
   calibrationIndex: number;
   calibration: Calibration;
   points: (LoadPoint & {
@@ -229,6 +233,7 @@ export type FaultWindow = {
 };
 
 export type FaultResult = {
+  headline?: string;
   verdict: Verdict;
   reasons: string[];
   failure: {
@@ -250,6 +255,7 @@ export type FaultResult = {
 
 export type SensRun = { value: number; p95Ms: number; errorRatePct: number; cpuPct: number; meetsSla: boolean };
 export type SensitivityResult = {
+  headline?: string;
   peakTps: number;
   step: number;
   baseline: { p95Ms: number; errorRatePct: number; cpuPct: number; meetsSla: boolean };

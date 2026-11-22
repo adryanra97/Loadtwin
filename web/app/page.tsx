@@ -21,7 +21,7 @@ export default function Home() {
             <h1 id="ed-hero-title">Your next bottleneck is already <em>in the model.</em></h1>
             <p className="ed-hero-lede">LoadTwin turns real load-test measurements into a simulation of your service — so you can challenge the assumptions behind your next deployment.</p>
             <div className="ed-hero-cta">
-              <Link href="/evaluate/" className="ed-primary-cta">Explore an evaluation <span aria-hidden="true">↗</span></Link>
+              <Link href="/evaluate/" className="ed-primary-cta">Run an evaluation <span aria-hidden="true">→</span></Link>
               <a href="#try" className="ed-secondary-cta">Try it live <span aria-hidden="true">↓</span></a>
             </div>
             <p className="ed-hero-annotation">A simulation tool for understanding capacity, cost and performance risk. No account required.</p>
@@ -33,7 +33,7 @@ export default function Home() {
 
       <section id="try" className="ed-play ed-section" aria-labelledby="ed-play-title">
         <div className="ed-container">
-          <div className="ed-play-head"><div><span className="ed-label">THE INTERACTIVE MODEL</span><h2 id="ed-play-title">Curiosity, meet <em>consequence.</em></h2><p>Change the load or the machine setup. Add traffic, add nodes, crash one. Every change is re-simulated by the real engine, on the spot.</p></div><Link href="/service/" className="ed-text-link">Change service inputs <span aria-hidden="true">↗</span></Link></div>
+          <div className="ed-play-head"><div><span className="ed-label">THE INTERACTIVE MODEL</span><h2 id="ed-play-title">Curiosity, meet <em>consequence.</em></h2><p>Change the load or the machine setup. Add traffic, add nodes, crash one. Every change is re-simulated by the real engine, on the spot.</p></div><Link href="/service/" className="ed-text-link">Enter your measurements <span aria-hidden="true">→</span></Link></div>
           <HomeDemo />
         </div>
       </section>
@@ -45,7 +45,7 @@ export default function Home() {
             <h2 id="ed-question-title">A load test tells you <em>what happened.</em><br />What about everything you haven&apos;t tested?</h2>
             <div className="ed-statement-lower">
               <p>Production conditions rarely stand still. Workloads shift. Machines change. Dependencies slow down. LoadTwin lets you explore those scenarios using an explicit model calibrated from the evidence you already have.</p>
-              <Link href="/service/" className="ed-text-link">Start with your measurements <span aria-hidden="true">↗</span></Link>
+              <Link href="/service/" className="ed-text-link">Enter your measurements <span aria-hidden="true">→</span></Link>
             </div>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function Home() {
             <Link href={d.href} key={d.number} className="ed-decision">
               <span className="ed-decision-number">{d.number}</span>
               <div className="ed-decision-main"><span>{d.category}</span><h3>{d.question}</h3><p>{d.detail}</p></div>
-              <span className="ed-decision-action">{d.action} <b aria-hidden="true">↗</b></span>
+              <span className="ed-decision-action">{d.action} <b aria-hidden="true">→</b></span>
             </Link>
           ))}</div>
           <div className="ed-toolkit" aria-labelledby="ed-toolkit-title">
@@ -120,7 +120,7 @@ export default function Home() {
 
       <section id="approach" className="ed-approach ed-section" aria-labelledby="ed-approach-title">
         <div className="ed-container ed-approach-grid">
-          <div><p className="ed-label">THE METHOD</p><h2 id="ed-approach-title">Make the model visible.<br /><em>Make the decision defensible.</em></h2><p>LoadTwin is built around discrete-event simulation with SimPy. It models queues and shared constraints rather than treating infrastructure capacity as a simple multiplier.</p><Link href="/validate/" className="ed-text-link">Explore model validation <span aria-hidden="true">↗</span></Link></div>
+          <div><p className="ed-label">THE METHOD</p><h2 id="ed-approach-title">Make the model visible.<br /><em>Make the decision defensible.</em></h2><p>LoadTwin is built around discrete-event simulation with SimPy. It models queues and shared constraints rather than treating infrastructure capacity as a simple multiplier.</p><Link href="/validate/" className="ed-text-link">Explore model validation <span aria-hidden="true">→</span></Link></div>
           <ol className="ed-method-list">
             <li><span>01</span><div><h3>Calibrate</h3><p>Start with observed throughput, CPU and latency from a load test.</p></div></li>
             <li><span>02</span><div><h3>Simulate</h3><p>Change demand, resource sizing and failure conditions inside a controlled model.</p></div></li>
@@ -131,7 +131,7 @@ export default function Home() {
 
 
       <section className="ed-close" aria-labelledby="ed-close-title">
-        <div className="ed-container ed-close-inner"><div><p className="ed-label">YOUR NEXT DEPLOYMENT</p><h2 id="ed-close-title">Know more.<br /><em>Assume less.</em></h2><p>Bring your test measurements, or begin with an example. See the model at work before making a capacity decision.</p></div><Link href="/service/" className="ed-close-cta">Build your service twin <span aria-hidden="true">↗</span></Link></div>
+        <div className="ed-container ed-close-inner"><div><p className="ed-label">YOUR NEXT DEPLOYMENT</p><h2 id="ed-close-title">Know more.<br /><em>Assume less.</em></h2><p>Bring your test measurements, or begin with an example. See the model at work before making a capacity decision.</p></div><Link href="/service/" className="ed-close-cta">Enter your measurements <span aria-hidden="true">→</span></Link></div>
       </section>
     </div>
   );

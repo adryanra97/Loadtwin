@@ -10,6 +10,7 @@ import { breachBands, faultFrames } from "@/lib/replay";
 import { ServiceStrip, useService } from "@/components/shell";
 import { NumberField, Stat, VerdictBanner } from "@/components/ui";
 import { check, type FieldDef } from "@/lib/fields";
+import { faultErrorTitle, faultP95Title } from "@/lib/takeaways";
 import { num, pct, seconds } from "@/lib/format";
 import { KEYS, usePersistent } from "@/lib/store";
 import type { FaultIn, FaultResult } from "@/lib/types";
@@ -185,6 +186,7 @@ function Results({
     <div className="stack" style={{ opacity: stale ? 0.55 : 1, transition: "opacity .2s" }}>
       <VerdictBanner
         verdict={res.verdict}
+        headline={res.headline}
         title={res.verdict === "PASS" ? "Survives" : res.verdict === "FAIL" ? "Does not survive" : "Survives, barely"}
         plain={
           res.verdict === "PASS"
@@ -200,6 +202,19 @@ function Results({
           ))}
         </ul>
       </VerdictBanner>
+      <div className="stats">
+        <Stat
+          k="p95 during the failure"
+          v={ph.during.p95Ms !== null ? `${num(ph.during.p95Ms)} ms` : "—"}
+          s={`Healthy: ${ph.healthyDuring.p95Ms !== null ? `${num(ph.healthyDuring.p95Ms)} ms` : "—"}`}
+        />
+        <Stat k="Errors during the failure" v={pct(ph.during.errorRatePct, 2)} s={`Healthy: ${pct(ph.healthyDuring.errorRatePct, 2)}`} />
+        <Stat
+          k="Recovery"
+          v={res.recoverySeconds !== null ? seconds(res.recoverySeconds) : "—"}
+          s={res.recoverySeconds !== null ? "After the failure ends" : "No SLA breach to recover from, or none seen"}
+        />
+      </div>
       <ReplayOrLive
         startTps={res.failure.tps}
         replay={
@@ -215,22 +230,9 @@ function Results({
           />
         }
       />
-      <div className="stats">
-        <Stat
-          k="p95 during the failure"
-          v={ph.during.p95Ms !== null ? `${num(ph.during.p95Ms)} ms` : "—"}
-          s={`Healthy: ${ph.healthyDuring.p95Ms !== null ? `${num(ph.healthyDuring.p95Ms)} ms` : "—"}`}
-        />
-        <Stat k="Errors during the failure" v={pct(ph.during.errorRatePct, 2)} s={`Healthy: ${pct(ph.healthyDuring.errorRatePct, 2)}`} />
-        <Stat
-          k="Recovery"
-          v={res.recoverySeconds !== null ? seconds(res.recoverySeconds) : "—"}
-          s={res.recoverySeconds !== null ? "After the failure ends" : "No SLA breach to recover from, or none seen"}
-        />
-      </div>
       <div className="card stack">
         <div className="card-head">
-          <h2>p95 response time</h2>
+          <div className="chart-heading"><p className="chart-kicker">p95 response time</p><h2>{faultP95Title(res, sla.maxP95Ms)}</h2></div>
           <span className="hint">10-second windows; the failure is shaded</span>
         </div>
         <LineChart
@@ -248,7 +250,7 @@ function Results({
         />
       </div>
       <div className="card stack">
-        <h2>Error rate</h2>
+        <div className="chart-heading"><p className="chart-kicker">Error rate</p><h2>{faultErrorTitle(res, sla.maxErrorRatePct)}</h2></div>
         <LineChart
           label="Error rate over time, with and without the failure"
           yLabel="Errors (%)"

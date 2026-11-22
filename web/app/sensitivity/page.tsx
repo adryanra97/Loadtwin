@@ -132,6 +132,7 @@ function Results({ res, slaP95, stale, nodes }: { res: SensitivityResult; slaP95
   const x = (v: number) => ((Math.min(v, hi) - lo) / (hi - lo)) * 100;
   return (
     <div className="stack" style={{ opacity: stale ? 0.55 : 1, transition: "opacity .2s" }}>
+      {res.headline && <h2 className="action-title">{res.headline}</h2>}
       <div className="stats">
         <Stat k={`p95 at ${num(res.peakTps)} req/s`} v={`${num(base)} ms`} s={res.baseline.meetsSla ? "Meets the SLA" : "Breaks the SLA"} />
         <Stat k="Biggest lever" v={res.params[0]?.label ?? "—"} s={res.params[0] ? `p95 swings by ${num(res.params[0].swingMs)} ms` : undefined} />
@@ -139,7 +140,7 @@ function Results({ res, slaP95, stale, nodes }: { res: SensitivityResult; slaP95
       </div>
       <div className="card stack">
         <div className="card-head">
-          <h2>What moves p95</h2>
+          <div className="chart-heading"><p className="chart-kicker">What moves p95</p><h2>Ranked by how far p95 swings when each input moves</h2></div>
           <span className="hint">Each input −{pct0}% and +{pct0}%, sorted by impact</span>
         </div>
         <div className="legend" aria-hidden>

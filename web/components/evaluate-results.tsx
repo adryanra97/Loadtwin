@@ -6,6 +6,7 @@ import { Stat, VerdictBadge, VerdictBanner } from "@/components/ui";
 import { num, pct, resourceName } from "@/lib/format";
 import { evaluateFrames, breachBands } from "@/lib/replay";
 import type { EvaluateResult, Service } from "@/lib/types";
+import { capacityTitle, cpuTitle, mcTitle, p95Title, scenariosTitle } from "@/lib/takeaways";
 import { ReplayOrLive } from "./live-playground";
 import { TwinStage } from "./twin-stage";
 
@@ -38,7 +39,7 @@ export function EvaluateResults({
   );
   return (
     <div className="stack" style={{ opacity: stale ? 0.55 : 1, transition: "opacity .2s" }}>
-      <VerdictBanner verdict={res.verdict}>
+      <VerdictBanner verdict={res.verdict} headline={res.headline}>
         <ul className="reasons">
           {res.reasons.map((x) => (
             <li key={x}>{x}</li>
@@ -55,6 +56,21 @@ export function EvaluateResults({
           </div>
         )}
       </VerdictBanner>
+
+      <div className="stats">
+        <Stat
+          k="Max sustainable load"
+          v={res.capacity ? `${num(res.capacity.maxTps, 1)} req/s` : "—"}
+          s={peak && res.capacity ? `${num(res.capacity.maxTps / peak.tps, 1)}× the peak` : undefined}
+        />
+        <Stat k="Limiting resource" v={resourceName(res.limitingResource)} s="Runs out first as load grows" />
+        <Stat k="Breaking point" v={res.breakingPointTps ? `${num(res.breakingPointTps)} req/s` : "Not reached"} s="First stress run that fails" />
+        <Stat
+          k="Calibration error"
+          v={pct(res.calibration.errorPct, 1)}
+          s={`Simulated ${num(res.calibration.simulatedP95Ms)} ms vs measured ${num(res.calibration.referenceP95Ms)} ms`}
+        />
+      </div>
 
       {nodes !== undefined && frames.length > 0 && (
         <ReplayOrLive
@@ -74,25 +90,11 @@ export function EvaluateResults({
         />
       )}
 
-      <div className="stats">
-        <Stat
-          k="Max sustainable load"
-          v={res.capacity ? `${num(res.capacity.maxTps, 1)} req/s` : "—"}
-          s={peak && res.capacity ? `${num(res.capacity.maxTps / peak.tps, 1)}× the peak` : undefined}
-        />
-        <Stat k="Limiting resource" v={resourceName(res.limitingResource)} s="Runs out first as load grows" />
-        <Stat k="Breaking point" v={res.breakingPointTps ? `${num(res.breakingPointTps)} req/s` : "Not reached"} s="First stress run that fails" />
-        <Stat
-          k="Calibration error"
-          v={pct(res.calibration.errorPct, 1)}
-          s={`Simulated ${num(res.calibration.simulatedP95Ms)} ms vs measured ${num(res.calibration.referenceP95Ms)} ms`}
-        />
-      </div>
 
       {mc && (
         <div className="card stack">
           <div className="card-head">
-            <h2>Breach probability at peak</h2>
+            <div className="chart-heading"><p className="chart-kicker">Breach probability at peak</p><h2>{mcTitle(mc)}</h2></div>
             <span className={`badge tone-${mc.breachProbability === 0 ? "good" : mc.breachProbability < 0.5 ? "warn" : "bad"}`}>
               {pct(mc.breachProbability * 100)} of {mc.runs} runs
             </span>
@@ -127,7 +129,7 @@ export function EvaluateResults({
 
       <div className="card">
         <div className="card-head">
-          <h2>Scenarios</h2>
+          <div className="chart-heading"><p className="chart-kicker">Scenarios</p><h2>{scenariosTitle(res)}</h2></div>
           <span className="hint">Simulated 60 s each after a warm-up</span>
         </div>
         <div className="table-wrap" tabIndex={0} role="region" aria-label="Scenarios table">
@@ -168,7 +170,7 @@ export function EvaluateResults({
 
       {ts.length > 0 && (
         <div className="card stack">
-          <h2>Peak run over time</h2>
+          <div className="chart-heading"><p className="chart-kicker">Peak run over time</p><h2>{p95Title(ts.map((b) => b.p95), sla.maxP95Ms)}</h2></div>
           <LineChart
             label="p95 response time during the peak run"
             yLabel="p95 (ms)"
@@ -177,6 +179,7 @@ export function EvaluateResults({
             threshold={{ y: sla.maxP95Ms, label: `SLA ${num(sla.maxP95Ms)} ms` }}
             height={200}
           />
+          <h3 className="chart-subtitle">{cpuTitle(ts.map((b) => b.cpu), sla.maxCpuPct)}</h3>
           <LineChart
             label="CPU and worker-thread use during the peak run"
             yLabel="Utilization (%)"
@@ -196,7 +199,7 @@ export function EvaluateResults({
       {items.length > 0 && peak && (
         <div className="card stack">
           <div className="card-head">
-            <h2>Capacity by resource</h2>
+            <div className="chart-heading"><p className="chart-kicker">Capacity by resource</p><h2>{capacityTitle(res, peak.tps)}</h2></div>
             <span className="hint">The shortest bar sets the limit</span>
           </div>
           <BarList items={items} unit="req/s" label="Maximum load per resource" marker={{ value: peak.tps, label: `Peak load ${num(peak.tps)} req/s` }} />

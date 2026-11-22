@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from loadtwin.calibration import Database, Measurement, prepare
 from loadtwin.capacity import capacity
 from loadtwin.engine import DURATION_S, Spec, seed_from, simulate
+from loadtwin.headlines import evaluate_headline, resource
 from loadtwin.montecarlo import apply_breach_probability, replicate
 from loadtwin.sla import FAIL, NOT_ASSESSABLE, PASS, PASS_WITH_CONDITIONS, SLA, utilization, violations
 
@@ -152,7 +153,7 @@ def evaluate(
     elif any(s["violations"] for s in core):
         verdict = FAIL
         for s in core:
-            reasons += [f"{s['name']} ({s['tps']:g} TPS): {x}" for x in s["violations"]]
+            reasons += [f"{s['name'].capitalize()} ({s['tps']:g} req/s): {x}." for x in s["violations"]]
     elif scale_ratio > EXTRAPOLATION_LIMIT:
         verdict = PASS_WITH_CONDITIONS
         reasons.append(
@@ -165,14 +166,14 @@ def evaluate(
         )
     elif top_pct > HEADROOM_LIMIT_PCT:
         verdict = PASS_WITH_CONDITIONS
-        reasons.append(f"All criteria are met, but headroom is thin: {top_res} at {top_pct}% during peak.")
-        conditions.append(f"Monitor {top_res} closely for the first 7 days after release.")
+        reasons.append(f"Every limit is met, but headroom is thin: {resource(top_res)} reaches {top_pct}% at peak.")
+        conditions.append(f"Watch {resource(top_res)} closely for the first 7 days after release.")
     else:
         verdict = PASS
-        reasons.append("All indicators meet the SLA at normal and peak load with enough headroom.")
+        reasons.append(f"Every limit is met at normal and peak load, and no resource goes above {HEADROOM_LIMIT_PCT:g}% at peak.")
     reasons.append(
-        f"Maximum sustainable load is {cap['maxTps']:g} TPS ({cap['maxTps'] / max(load.peak_tps, 0.1):.1f}x peak), "
-        f"bounded by {cap['limitingResource']}."
+        f"The most it can sustain is {cap['maxTps']:g} req/s ({cap['maxTps'] / max(load.peak_tps, 0.1):.1f}x the peak), "
+        f"limited by {resource(cap['limitingResource'])}."
     )
 
     mc = None
@@ -180,8 +181,10 @@ def evaluate(
         mc = replicate(target_spec, profile, load.peak_tps, sla, replications, seed_from(seed, "monte-carlo"))
         verdict = apply_breach_probability(verdict, mc, reasons, conditions)
 
+    headline = evaluate_headline(verdict, load.peak_tps, peak, cap, cal["errorPct"], sla, mc)
     return {
         "verdict": verdict,
+        "headline": headline,
         "reasons": reasons,
         "conditions": conditions,
         "limitingResource": limiting,

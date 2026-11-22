@@ -21,6 +21,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from loadtwin.engine import BUCKET_S, Profile, Spec, percentile, simulate
+from loadtwin.headlines import pattern_headline
 from loadtwin.sla import FAIL, PASS, PASS_WITH_CONDITIONS, SLA
 
 WINDOW_S = 10.0
@@ -188,6 +189,7 @@ def run_pattern(spec: Spec, profile: Profile, pattern: Pattern, sla: SLA, seed: 
         reasons.append(f"After the load drops, the cluster needs {recovery:g} s to meet the SLA again.")
     return {
         "verdict": verdict,
+        "headline": pattern_headline(verdict, pattern.kind, breach_s, share, worst, recovery),
         "reasons": reasons,
         "segments": [{"durationS": d, "tps": round(tps, 2)} for d, tps in segs],
         "windows": windows,

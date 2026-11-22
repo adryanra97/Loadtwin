@@ -93,7 +93,7 @@ export default function ServicePage() {
         <nav className="lt-service-breadcrumb" aria-label="Breadcrumb"><Link href="/">Overview</Link><span aria-hidden="true">/</span><span aria-current="page">Service setup</span></nav>
         <div className="lt-service-head-row">
           <div><span className="lt-overline">YOUR SIMULATION STARTS HERE</span><h1>Set up your service<span className="lt-service-period">.</span></h1><p>Use measurements from one load test to define your baseline. Then choose the environment you want to evaluate and the limits it needs to meet.</p></div>
-          <button type="button" className="lt-use-example" onClick={() => { setDraft({ ...EXAMPLE_SERVICE }); setStatus("Example loaded. Review it and save to use it in your evaluations."); }}>↗ Use example values</button>
+          <button type="button" className="lt-use-example" onClick={() => { setDraft({ ...EXAMPLE_SERVICE }); setStatus("Example loaded. Review it and save to use it in your evaluations."); }}>Use example values</button>
         </div>
         <div className="lt-service-assurance">
           <span><i aria-hidden="true">✓</i> Saved in this browser</span>

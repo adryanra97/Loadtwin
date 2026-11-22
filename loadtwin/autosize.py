@@ -26,6 +26,7 @@ from dataclasses import dataclass, replace
 from loadtwin.calibration import Database, Measurement, calibrate
 from loadtwin.engine import Spec, seed_from, simulate, usl_factor
 from loadtwin.evaluate import HEADROOM_LIMIT_PCT
+from loadtwin.headlines import autosize_headline
 from loadtwin.sla import SLA, utilization, violations
 
 HOURS_PER_MONTH = 730.0
@@ -163,6 +164,7 @@ def autosize(
         db_limit = round(base.db_capacity * 0.8 / max(base.db_ms / 1000, 0.0005), 1)
     if db_limit is not None and db_limit < peak_tps:
         return {
+            "headline": autosize_headline(peak_tps, None, None, db_limit),
             "peakTps": peak_tps,
             "options": [],
             "recommended": None,
@@ -258,6 +260,7 @@ def autosize(
             f"the recommendation costs ${extra:,.0f}/month more to keep every resource at or below {HEADROOM_LIMIT_PCT:g}%."
         )
     return {
+        "headline": autosize_headline(peak_tps, recommended, cheapest, db_limit),
         "peakTps": peak_tps,
         "options": options,
         "recommended": recommended,
