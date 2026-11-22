@@ -66,9 +66,9 @@ export function EvaluateResults({
         <Stat k="Limiting resource" v={resourceName(res.limitingResource)} s="Runs out first as load grows" />
         <Stat k="Breaking point" v={res.breakingPointTps ? `${num(res.breakingPointTps)} req/s` : "Not reached"} s="First stress run that fails" />
         <Stat
-          k="Calibration error"
-          v={pct(res.calibration.errorPct, 1)}
-          s={`Simulated ${num(res.calibration.simulatedP95Ms)} ms vs measured ${num(res.calibration.referenceP95Ms)} ms`}
+          k="Model fit"
+          v={`${pct(res.calibration.errorPct, 1)} off`}
+          s={`Model says ${num(res.calibration.simulatedP95Ms)} ms p95, your test measured ${num(res.calibration.referenceP95Ms)} ms`}
         />
       </div>
 

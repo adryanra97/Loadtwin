@@ -707,3 +707,160 @@ body .tool > aside {
     height: 22px !important;
   }
 }
+
+/* ---------- Home type scale: eight steps, nothing in between ----------
+   12 label · 14 small · 16 body · 18 lead · 22 strong · 28 subhead · h2 · display */
+:root {
+  --t-12: 12px;
+  --t-14: 14px;
+  --t-16: 16px;
+  --t-18: 18px;
+  --t-22: 22px;
+  --t-28: 28px;
+  --t-h2: clamp(36px, 3.9vw, 56px);
+  --t-display: clamp(46px, min(5.4vw, 9vh), 78px);
+}
+@media (max-width: 640px) {
+  :root {
+    --t-18: 17px;
+    --t-22: 20px;
+    --t-28: 24px;
+    --t-h2: clamp(32px, 9vw, 38px);
+    --t-display: clamp(40px, 12vw, 50px);
+  }
+}
+body .ed-home .ed-hero-copy h1,
+body .ed-home .ed-evidence-cell > strong {
+  font-size: var(--t-display);
+}
+body .ed-home section h2,
+body .ed-home .ed-arch-primary strong {
+  font-size: var(--t-h2);
+}
+body .ed-home .ed-method-list h3,
+body .ed-home .ed-arch-secondary strong,
+body .ed-home .ed-evidence-connector span,
+body .ed-home .ed-evidence-connector b {
+  font-size: var(--t-28);
+}
+body .ed-home .ed-evidence-line b,
+body .ed-home .ed-evidence-caption p,
+body .ed-home .lt-home-demo-idle strong,
+body .ed-home .ed-tool strong {
+  font-size: var(--t-22);
+}
+body .ed-home .ed-hero-lede,
+body .ed-home .ed-statement-lower p,
+body .ed-home .ed-decisions-intro > p:last-child {
+  font-size: var(--t-18);
+}
+body .ed-home .ed-play-head p:not(.ed-label),
+body .ed-home .ed-method-list p,
+body .ed-home .ed-approach p:not(.ed-label) {
+  font-size: var(--t-16);
+}
+body .ed-home .ed-evidence-conclusion,
+body .ed-home .ed-tool-q,
+body .ed-home .ed-close-cta,
+body .ed-home .ed-tool-gives,
+body .ed-home .lt-demo-start,
+body .ed-home .lt-home-demo-idle p,
+body .ed-home .ed-architecture-modes button {
+  font-size: var(--t-14);
+}
+body .ed-home .ed-label,
+body .ed-home .ed-eyebrow,
+body .ed-home .ed-hero-annotation,
+body .ed-home .ed-section-mark span,
+body .ed-home .ed-evidence-index,
+body .ed-home .ed-evidence-caption > span,
+body .ed-home .ed-fine-print,
+body .ed-home .ed-tool-group,
+body .ed-home .ed-arch-status,
+body .ed-home .ed-architecture-top span,
+body .ed-home .ed-arch-primary > span,
+body .ed-home .ed-arch-primary small,
+body .ed-home .ed-arch-secondary span,
+body .ed-home .ed-architecture-modes button span {
+  font-size: var(--t-12);
+}
+/* Arrows follow the text they sit in */
+body .ed-home a span[aria-hidden="true"],
+body .ed-home .ed-close-cta span {
+  font-size: inherit;
+}
+
+/* Merged tools section: the grid follows the intro directly */
+body .ed-home .ed-toolkit {
+  margin-top: 0;
+}
+
+/* Playground before launch: say what you can do there, no dead space */
+.lt-demo-can {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+}
+.lt-demo-can li {
+  font-size: 13px;
+  color: #22445e;
+  background: #eef5f8;
+  border: 1px solid #d4e4ec;
+  padding: 6px 11px;
+}
+body .ed-home #try.ed-section {
+  padding-block: clamp(64px, 6vw, 104px);
+}
+
+/* Shorter home on phones */
+@media (max-width: 640px) {
+  body .ed-home .ed-section {
+    padding-block: 64px;
+  }
+  body .ed-home .ed-decisions-intro {
+    margin-bottom: 32px;
+  }
+  body .ed-home .lt-demo-emblem {
+    display: none;
+  }
+  body .ed-home .lt-home-demo-idle {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 22px 20px;
+  }
+}
+body .ed-home .ed-evidence-cell > strong small,
+body .ed-home .ed-method-list li > span {
+  font-size: var(--t-28);
+}
+body .ed-home .ed-hero-bottom span,
+body .ed-home .ed-hero-bottom a,
+body .ed-home .ed-architecture-caption,
+body .ed-home .ed-architecture-caption * {
+  font-size: var(--t-12);
+}
+.lt-demo-can li {
+  font-size: var(--t-14);
+}
+/* Plain list, not chips: these are not buttons */
+.lt-demo-can {
+  gap: 6px 20px;
+}
+.lt-demo-can li {
+  background: none;
+  border: 0;
+  padding: 0 0 0 14px;
+  position: relative;
+}
+.lt-demo-can li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  background: #2f6fa3;
+}

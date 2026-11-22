@@ -18,7 +18,8 @@ export function HomeDemo(){
   return <div className="lt-home-demo" id="lt-home-demo-content">
     {!open ? <div className="lt-home-demo-idle">
       <div className="lt-demo-emblem" aria-hidden="true"><span/><span/><span/></div>
-      <div><strong>Ready to explore a live scenario?</strong><p>Launch the playground when you&apos;re ready. It uses the simulation engine and the service currently saved in your browser.</p></div>
+      <div><strong>Break the example service yourself</strong><p>The playground runs the real engine on the service saved in your browser (the example, until you enter your own).</p>
+        <ul className="lt-demo-can" aria-label="What you can do in the playground"><li>Raise traffic past the peak</li><li>Add or remove nodes</li><li>Crash a node and watch traffic move</li></ul></div>
       <button type="button" className="lt-demo-start" aria-expanded={false} aria-controls="lt-home-demo-content" onClick={()=>setOpen(true)}>Launch playground <span aria-hidden="true">→</span></button>
     </div> : <div className="lt-home-demo-active">
       <div className="lt-home-demo-toolbar"><span>LIVE SIMULATION · YOUR SAVED SERVICE</span><button type="button" onClick={()=>setOpen(false)} aria-expanded={true} aria-controls="lt-home-demo-content">Close playground ×</button></div>

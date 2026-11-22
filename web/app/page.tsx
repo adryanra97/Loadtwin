@@ -5,12 +5,6 @@ import { TOOLS, type ToolId } from "@/lib/tools";
 
 const TOOL_ORDER: ToolId[] = ["evaluate", "autosize", "patterns", "failures", "sensitivity", "validate", "ask"];
 
-const DECISIONS = [
-  { number: "01", category: "CAPACITY", question: "Will this system hold?", detail: "Understand if your target configuration meets latency, error and utilization limits — and which resource becomes the constraint first.", href: "/evaluate/", action: "Evaluate capacity" },
-  { number: "02", category: "ARCHITECTURE", question: "What should we change?", detail: "Compare machines, node counts and the headroom of each option before committing to the next infrastructure configuration.", href: "/autosize/", action: "Explore auto-sizing" },
-  { number: "03", category: "RESILIENCE", question: "What happens when things go wrong?", detail: "Explore surges, node failures and bottlenecks. See how simulated performance changes when the environment is under pressure.", href: "/failures/", action: "Test failure scenarios" },
-];
-
 export default function Home() {
   return (
     <div className="lt-home ed-home">
@@ -40,7 +34,7 @@ export default function Home() {
 
       <section id="question" className="ed-statement ed-section" aria-labelledby="ed-question-title">
         <div className="ed-container ed-statement-grid">
-          <div className="ed-section-mark"><span>THE QUESTION</span><span>01 / 04</span></div>
+          <div className="ed-section-mark"><span>THE QUESTION</span></div>
           <div className="ed-statement-content">
             <h2 id="ed-question-title">A load test tells you <em>what happened.</em><br />What about everything you haven&apos;t tested?</h2>
             <div className="ed-statement-lower">
@@ -56,7 +50,7 @@ export default function Home() {
           <div className="ed-evidence-heading"><span className="ed-label">ONE EXAMPLE, TWO VERY DIFFERENT OUTCOMES</span><h2 id="ed-evidence-title">The first failure isn&apos;t always where you expect.</h2></div>
           <div className="ed-evidence-comparison">
             <div className="ed-evidence-cell">
-              <span className="ed-evidence-index">01 / PEAK TRAFFIC</span>
+              <span className="ed-evidence-index">PEAK TRAFFIC</span>
               <strong>45 <small>req/s</small></strong>
               <div className="ed-evidence-line"><span>Predicted CPU</span><b>46.8%</b></div>
               <div className="ed-evidence-line"><span>Predicted p95 latency</span><b>390 ms</b></div>
@@ -64,7 +58,7 @@ export default function Home() {
             </div>
             <div className="ed-evidence-connector" aria-hidden="true"><span>2×</span><b>→</b></div>
             <div className="ed-evidence-cell ed-evidence-risk">
-              <span className="ed-evidence-index">02 / STRESS TRAFFIC</span>
+              <span className="ed-evidence-index">STRESS TRAFFIC (2× PEAK)</span>
               <strong>90 <small>req/s</small></strong>
               <div className="ed-evidence-line"><span>Predicted CPU</span><b>93.3%</b></div>
               <div className="ed-evidence-line"><span>Predicted p95 latency</span><b>777 ms</b></div>
@@ -78,26 +72,15 @@ export default function Home() {
 
       <section id="decisions" className="ed-decisions ed-section" aria-labelledby="ed-decisions-title">
         <div className="ed-container">
-          <div className="ed-decisions-intro"><p className="ed-label">THE WORK / THREE IMPORTANT DECISIONS</p><h2 id="ed-decisions-title">Complex systems.<br /><em>Clearer questions.</em></h2><p>One model. Different ways to understand how your service behaves — before you change the infrastructure behind it.</p></div>
-          <div className="ed-decision-list">{DECISIONS.map(d=>(
-            <Link href={d.href} key={d.number} className="ed-decision">
-              <span className="ed-decision-number">{d.number}</span>
-              <div className="ed-decision-main"><span>{d.category}</span><h3>{d.question}</h3><p>{d.detail}</p></div>
-              <span className="ed-decision-action">{d.action} <b aria-hidden="true">→</b></span>
-            </Link>
-          ))}</div>
-          <div className="ed-toolkit" aria-labelledby="ed-toolkit-title">
-            <div className="ed-toolkit-head">
-              <h3 id="ed-toolkit-title">Seven methods, one model, plus a live mode</h3>
-              <p>Each tool asks the same calibrated twin a different question. Start anywhere; they share your service.</p>
-            </div>
+          <div className="ed-decisions-intro"><p className="ed-label">THE TOOLS</p><h2 id="ed-decisions-title">Seven questions for <em>the same model.</em></h2><p>Each tool asks your calibrated twin something different: will it hold, what to buy, what happens when a node dies. Start with Evaluate; every tool reuses the service you saved.</p></div>
+          <div className="ed-toolkit">
             <ul className="ed-toolkit-grid">
               {TOOL_ORDER.map((id) => {
                 const t = TOOLS[id];
                 return (
                   <li key={id}>
                     <Link href={t.href} className="ed-tool">
-                      <span className="ed-tool-group">{t.group}</span>
+                      <span className="ed-tool-group">{id === "evaluate" ? "Start here" : t.group}</span>
                       <strong>{t.name}</strong>
                       <span className="ed-tool-q">{t.question}</span>
                       <span className="ed-tool-gives">{t.gives}</span>
@@ -120,7 +103,7 @@ export default function Home() {
 
       <section id="approach" className="ed-approach ed-section" aria-labelledby="ed-approach-title">
         <div className="ed-container ed-approach-grid">
-          <div><p className="ed-label">THE METHOD</p><h2 id="ed-approach-title">Make the model visible.<br /><em>Make the decision defensible.</em></h2><p>LoadTwin is built around discrete-event simulation with SimPy. It models queues and shared constraints rather than treating infrastructure capacity as a simple multiplier.</p><Link href="/validate/" className="ed-text-link">Explore model validation <span aria-hidden="true">→</span></Link></div>
+          <div><p className="ed-label">THE METHOD</p><h2 id="ed-approach-title">Every prediction traces back to <em>your own load test.</em></h2><p>LoadTwin is built around discrete-event simulation with SimPy. It models queues and shared constraints rather than treating infrastructure capacity as a simple multiplier.</p><Link href="/validate/" className="ed-text-link">Explore model validation <span aria-hidden="true">→</span></Link></div>
           <ol className="ed-method-list">
             <li><span>01</span><div><h3>Calibrate</h3><p>Start with observed throughput, CPU and latency from a load test.</p></div></li>
             <li><span>02</span><div><h3>Simulate</h3><p>Change demand, resource sizing and failure conditions inside a controlled model.</p></div></li>
@@ -131,7 +114,7 @@ export default function Home() {
 
 
       <section className="ed-close" aria-labelledby="ed-close-title">
-        <div className="ed-container ed-close-inner"><div><p className="ed-label">YOUR NEXT DEPLOYMENT</p><h2 id="ed-close-title">Know more.<br /><em>Assume less.</em></h2><p>Bring your test measurements, or begin with an example. See the model at work before making a capacity decision.</p></div><Link href="/service/" className="ed-close-cta">Enter your measurements <span aria-hidden="true">→</span></Link></div>
+        <div className="ed-container ed-close-inner"><div><p className="ed-label">YOUR NEXT DEPLOYMENT</p><h2 id="ed-close-title">Find the breaking point <em>before your users do.</em></h2><p>Bring your test measurements, or begin with an example. See the model at work before making a capacity decision.</p></div><Link href="/service/" className="ed-close-cta">Enter your measurements <span aria-hidden="true">→</span></Link></div>
       </section>
     </div>
   );
